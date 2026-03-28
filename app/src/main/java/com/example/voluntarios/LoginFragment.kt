@@ -73,7 +73,7 @@ class LoginFragment : Fragment() {
                             displayName = user.displayName ?: email.substringBefore("@")
                         )
                     }
-                    Toast.makeText(requireContext(), "Bienvenido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
                     irASolicitudTurno()
                 }
                 .addOnFailureListener { e ->
@@ -121,7 +121,7 @@ class LoginFragment : Fragment() {
                                 displayName = user.displayName ?: account.displayName.orEmpty()
                             )
                         }
-                        Toast.makeText(requireContext(), "Bienvenido con Google", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
                         irASolicitudTurno()
                     }
                     .addOnFailureListener { e ->
