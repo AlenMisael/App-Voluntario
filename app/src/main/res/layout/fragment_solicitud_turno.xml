@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Solicitud de turno"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/etDia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Día" />
+
+        <EditText
+            android:id="@+id/etHorario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Horario" />
+
+        <EditText
+            android:id="@+id/etDireccion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Dirección" />
+
+        <EditText
+            android:id="@+id/etDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descripción" />
+
+        <Button
+            android:id="@+id/btnGuardarTurno"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guardar turno"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>
