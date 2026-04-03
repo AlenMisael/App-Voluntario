@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -25,7 +26,12 @@ class LoginFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var db: AppDatabase
+
+
+
+    private val voluntarioViewModel: VoluntarioViewModel by viewModels {
+        VoluntarioViewModel.VoluntarioViewModelFactory((activity?.application as AppVoluntarios).voluntarioRepositorio)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,8 +44,8 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         auth = FirebaseAuth.getInstance()
-        db = AppDatabase.getInstance(requireContext())
 
         val etEmail = view.findViewById<EditText>(R.id.editTextTextEmailAddress)
         val etPassword = view.findViewById<EditText>(R.id.editTextTextPassword)
@@ -138,26 +144,20 @@ class LoginFragment : Fragment() {
         email: String,
         displayName: String
     ) {
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val existente = db.voluntarioDao().getByUid(uid)
+            val partes = displayName.trim().split(" ").filter { it.isNotBlank() }
+            val nombre = partes.firstOrNull() ?: "Usuario"
+            val apellido = if (partes.size > 1) partes.drop(1).joinToString(" ") else ""
 
-            if (existente == null) {
-                val partes = displayName.trim().split(" ").filter { it.isNotBlank() }
-                val nombre = partes.firstOrNull() ?: "Usuario"
-                val apellido = if (partes.size > 1) partes.drop(1).joinToString(" ") else ""
-
-                val voluntario = Voluntario(
+            val voluntario = Voluntario(
                     firebaseUid = uid,
                     nombre = nombre,
                     apellido = apellido,
                     fechaNac = "",
                     email = email
                 )
+            voluntarioViewModel.insertar(voluntario)
 
-                db.voluntarioDao().insert(voluntario)
             }
-        }
-    }
 
     private fun irASolicitudTurno() {
         parentFragmentManager.beginTransaction()

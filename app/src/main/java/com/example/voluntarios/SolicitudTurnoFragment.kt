@@ -14,10 +14,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+import androidx.fragment.app.viewModels
+
 class SolicitudTurnoFragment : Fragment() {
 
-    private lateinit var db: AppDatabase
     private lateinit var auth: FirebaseAuth
+
+    private val turnoViewModel: TurnoViewModel by viewModels {
+        TurnoViewModel.TurnoViewModelFactory(
+            (requireActivity().application as AppVoluntarios).turnoRepositorio,
+            (requireActivity().application as AppVoluntarios).voluntarioRepositorio
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,57 +37,48 @@ class SolicitudTurnoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val btnCerrarSesion = view.findViewById<Button>(R.id.btnCerrarSesion)
 
         auth = FirebaseAuth.getInstance()
-        db = AppDatabase.getInstance(requireContext())
 
-        val etDia = view.findViewById<EditText>(R.id.etDia)
-        val etHorario = view.findViewById<EditText>(R.id.etHorario)
-        val etDireccion = view.findViewById<EditText>(R.id.etDireccion)
-        val etDescripcion = view.findViewById<EditText>(R.id.etDescripcion)
         val btnGuardarTurno = view.findViewById<Button>(R.id.btnGuardarTurno)
+
+        btnCerrarSesion.setOnClickListener {
+            auth.signOut()
+
+            Toast.makeText(requireContext(), "Sesión cerrada", Toast.LENGTH_SHORT).show()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, LoginFragment())
+                .commit()
+        }
 
         btnGuardarTurno.setOnClickListener {
             val user = auth.currentUser
             if (user == null) {
-                Toast.makeText(requireContext(), "No hay usuario logueado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "No hay usuario logueado", Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
 
-            val dia = etDia.text.toString().trim()
-            val horario = etHorario.text.toString().trim()
-            val direccion = etDireccion.text.toString().trim()
-            val descripcion = etDescripcion.text.toString().trim()
-
-            if (dia.isEmpty() || horario.isEmpty() || direccion.isEmpty()) {
-                Toast.makeText(requireContext(), "Completá día, horario y dirección", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val turno = Turno(
-                firebaseUid = user.uid,
-                dia = dia,
-                horario = horario,
-                direccion = direccion,
-                descripcion = descripcion,
-                estado = "pendiente"
-            )
 
             viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.IO) {
-                    db.turnoDao().insert(turno)
+                val voluntario = turnoViewModel.getVoluntarioByUid(user.uid)
+
+                if (voluntario != null) {
+                    val turno = Turno(
+                        voluntarioId = voluntario.id,
+                        estado = "pendiente"
+                    )
+
+                    turnoViewModel.insertar(turno)
+
+                    Toast.makeText(
+                        requireContext(),
+                        "Turno creado en estado pendiente",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-
-                Toast.makeText(
-                    requireContext(),
-                    "Turno creado en estado pendiente",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                etDia.text.clear()
-                etHorario.text.clear()
-                etDireccion.text.clear()
-                etDescripcion.text.clear()
             }
         }
     }

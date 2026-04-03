@@ -10,19 +10,19 @@ import androidx.room.PrimaryKey
     foreignKeys = [
         ForeignKey(
             entity = Voluntario::class,
-            parentColumns = ["firebaseUid"],
-            childColumns = ["firebaseUid"],
+            parentColumns = ["id"],
+            childColumns = ["voluntarioId"],
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["firebaseUid"])]
+    indices = [Index(value = ["voluntarioId"])]
 )
 data class Turno(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val firebaseUid: String,
-    val dia: String,
-    val horario: String,
-    val direccion: String,
-    val descripcion: String,
+    @PrimaryKey(autoGenerate = true) var id: Long = 0,
+    val voluntarioId: Long,
+    val dia: String = "",
+    val horario: String = "",
+    val direccion: String = "",
+    val descripcion: String = "",
     val estado: String = "pendiente"
 )

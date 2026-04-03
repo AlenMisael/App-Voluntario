@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 interface TurnoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(turno: Turno)
+    suspend fun insert(turno: Turno): Long
 
-    @Query("SELECT * FROM turnos WHERE firebaseUid = :uid ORDER BY id DESC")
+    @Query("SELECT * FROM turnos WHERE voluntarioId = :uid ORDER BY id DESC")
     fun getTurnosDeUsuario(uid: String): Flow<List<Turno>>
 }
