@@ -20,6 +20,11 @@ class TurnoViewModel(private val repositorio: RepositorioTurno,private val volun
         }
     }
 
+    suspend fun actualizarVoluntario(voluntario: Voluntario) {
+        voluntarioRepositorio.actualizarVoluntario(voluntario)
+    }
+
+
     suspend fun getVoluntarioByUid(uid: String): Voluntario? {
         return voluntarioRepositorio.getByUid(uid)
     }
@@ -30,6 +35,14 @@ class TurnoViewModel(private val repositorio: RepositorioTurno,private val volun
                 _turnos.value = turnos
             }
         }
+    }
+
+    suspend fun getTurnoPorVoluntario(voluntarioId: Long): Turno? {
+        return repositorio.getTurnoPorVoluntario(voluntarioId)
+    }
+
+    suspend fun contarVoluntarios(): Int {
+        return voluntarioRepositorio.contar()
     }
 
     class TurnoViewModelFactory(

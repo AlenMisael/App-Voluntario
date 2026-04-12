@@ -10,4 +10,15 @@ class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao) {
         return voluntarioDao.getByUid(uid)
     }
 
+    suspend fun contar(): Int {
+        return voluntarioDao.contar()
+    }
+
+
+
+
+    suspend fun actualizarVoluntario(voluntario: Voluntario) {
+        return voluntarioDao.update(voluntario)
+    }
+
 }

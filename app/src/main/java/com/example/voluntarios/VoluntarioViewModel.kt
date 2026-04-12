@@ -28,6 +28,8 @@ class VoluntarioViewModel (private val repositorio: RepositorioVoluntario): View
         return repositorio.getByUid(uid)
     }
 
+
+
         class VoluntarioViewModelFactory(private val repositorio: RepositorioVoluntario) :
             ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {

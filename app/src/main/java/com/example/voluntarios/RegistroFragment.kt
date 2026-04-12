@@ -8,15 +8,22 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+
 class RegistroFragment : Fragment() {
 
+    private val voluntarioViewModel: VoluntarioViewModel by viewModels {
+        VoluntarioViewModel.VoluntarioViewModelFactory(
+            (requireActivity().application as AppVoluntarios).voluntarioRepositorio
+        )
+    }
+
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: AppDatabase
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +37,6 @@ class RegistroFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
-        db = AppDatabase.getInstance(requireContext())
 
         val etNombre = view.findViewById<EditText>(R.id.etNombre)
         val etApellido = view.findViewById<EditText>(R.id.etApellido)
@@ -40,12 +46,19 @@ class RegistroFragment : Fragment() {
         val btnCrearCuenta = view.findViewById<Button>(R.id.btnCrearCuenta)
         val btnVolverLogin = view.findViewById<Button>(R.id.btnVolverLogin)
 
+
+        etFechaNac.setOnClickListener {
+            mostrarDatePicker(requireContext(), etFechaNac)
+        }
+
         btnCrearCuenta.setOnClickListener {
             val nombre = etNombre.text.toString().trim()
             val apellido = etApellido.text.toString().trim()
             val fechaNac = etFechaNac.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
+
+
 
             if (nombre.isEmpty() || apellido.isEmpty() || fechaNac.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(requireContext(), "Completá todos los campos", Toast.LENGTH_SHORT).show()
@@ -65,7 +78,7 @@ class RegistroFragment : Fragment() {
                         )
 
                         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                            db.voluntarioDao().insert(voluntario)
+                            voluntarioViewModel.insertar(voluntario)
                         }
                     }
 

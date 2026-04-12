@@ -14,4 +14,9 @@ interface TurnoDao {
 
     @Query("SELECT * FROM turnos WHERE voluntarioId = :uid ORDER BY id DESC")
     fun getTurnosDeUsuario(uid: String): Flow<List<Turno>>
+
+    @Query("SELECT * FROM turnos WHERE voluntarioId = :id LIMIT 1")
+    suspend fun getTurnoPorVoluntario(id: Long): Turno?
+
+
 }

@@ -13,6 +13,12 @@ class RepositorioTurno(private val turnoDao: TurnoDao) {
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
+    suspend fun getTurnoPorVoluntario(voluntarioId: Long): Turno? {
+        return turnoDao.getTurnoPorVoluntario(voluntarioId)
+    }
+
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
     suspend fun getTurnosUsuario(uid: String): Flow<List<Turno>> {
         return turnoDao.getTurnosDeUsuario(uid)
     }
