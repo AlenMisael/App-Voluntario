@@ -16,12 +16,16 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 import androidx.fragment.app.viewModels
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.card.MaterialCardView
 import java.util.Calendar
 
 class SolicitudTurnoFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     private val turnoViewModel: TurnoViewModel by viewModels {
         TurnoViewModel.TurnoViewModelFactory(
@@ -39,7 +43,7 @@ class SolicitudTurnoFragment : Fragment() {
     }
 
     private suspend fun mostrarEstado(
-        turno: Turno,
+        turno: Turno, voluntario: Voluntario,
         layoutFormulario: View,
         cardEstado: View,
         tvMensaje: TextView,
@@ -59,7 +63,6 @@ class SolicitudTurnoFragment : Fragment() {
         card.setCardBackgroundColor(colorFondo)
 
 
-        tvEstado.text = "Tu turno se encuentra en estado: ${turno.estado}"
 
         tvEstado.text = when (turno.estado.lowercase()) {
             "pendiente" -> "Estado del turno: Pendiente"
@@ -68,7 +71,7 @@ class SolicitudTurnoFragment : Fragment() {
             else -> "Estado: ${turno.estado}"
         }
 
-        tvMensaje.text = "Muchas gracias por querer participar en el sistema de encuestas. " +
+        tvMensaje.text = "Muchas gracias ${voluntario.nombre}, ${voluntario.apellido}  por querer participar en el sistema de encuestas. " +
                 "Somos $totalVoluntarios voluntarios en total. " +
                 "Se te notificará por este medio cuando tu turno haya sido confirmado."
 
@@ -77,6 +80,12 @@ class SolicitudTurnoFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(requireContext(), gso)
 
         val etNombre = view.findViewById<EditText>(R.id.editTextNombre)
         val etApellido = view.findViewById<EditText>(R.id.editTextApellido)
@@ -103,7 +112,7 @@ class SolicitudTurnoFragment : Fragment() {
                     val turno = turnoViewModel.getTurnoPorVoluntario(voluntario.id)
 
                     if (turno != null) {
-                        mostrarEstado(turno,layoutFormulario, cardEstado, tvMensaje, tvEstado)
+                        mostrarEstado(turno,voluntario,layoutFormulario, cardEstado, tvMensaje, tvEstado)
                     }
                     else {
                         voluntario?.let {
@@ -128,11 +137,13 @@ class SolicitudTurnoFragment : Fragment() {
         btnCerrarSesion.setOnClickListener {
             auth.signOut()
 
-            Toast.makeText(requireContext(), "Sesión cerrada", Toast.LENGTH_SHORT).show()
+            googleSignInClient.signOut().addOnCompleteListener {
+                Toast.makeText(requireContext(), "Sesión cerrada", Toast.LENGTH_SHORT).show()
 
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, LoginFragment())
-                .commit()
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, LoginFragment())
+                    .commit()
+            }
         }
 
         btnGuardarTurno.setOnClickListener {
@@ -168,11 +179,12 @@ class SolicitudTurnoFragment : Fragment() {
 
                     val turno = Turno(
                         voluntarioId = voluntario.id,
+                        voluntariouid = voluntario.firebaseUid,
                         estado = "pendiente"
                     )
 
                     turnoViewModel.insertar(turno)
-                    mostrarEstado(turno, layoutFormulario, cardEstado, tvMensaje, tvEstado)
+                    mostrarEstado(turno, voluntarioActualizado, layoutFormulario, cardEstado, tvMensaje, tvEstado)
 
                     Toast.makeText(
                         requireContext(),

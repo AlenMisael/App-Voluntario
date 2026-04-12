@@ -15,11 +15,13 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["voluntarioId"])]
+    indices = [Index(value = ["fireStoreid"], unique = true)]
 )
 data class Turno(
     @PrimaryKey(autoGenerate = true) var id: Long = 0,
-    val voluntarioId: Long,
+    val voluntarioId: Long?,
+    val voluntariouid: String = "",
+    val fireStoreid: String = "",
     val dia: String = "",
     val horario: String = "",
     val direccion: String = "",
