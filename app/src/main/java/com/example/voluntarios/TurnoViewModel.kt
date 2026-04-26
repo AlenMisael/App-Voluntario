@@ -1,48 +1,40 @@
 package com.example.voluntarios
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class TurnoViewModel(private val repositorio: RepositorioTurno,private val voluntarioRepositorio: RepositorioVoluntario
-): ViewModel() {
+class TurnoViewModel(
+    private val repositorio: RepositorioTurno,
+    private val voluntarioRepositorio: RepositorioVoluntario
+) : ViewModel() {
 
-    private val _turnos = MutableLiveData<List<Turno>>()
-    val turnos: LiveData<List<Turno>> = _turnos
+    private val _turnoActual = MutableStateFlow<Turno?>(null)
+    val turnoActual: StateFlow<Turno?> = _turnoActual.asStateFlow()
 
-    fun insertar(turno: Turno) {
+    fun cargarTurno(voluntarioId: Long) {
         viewModelScope.launch {
-            val id = repositorio.insertar(turno)
-            turno.id = id
+            val turno = repositorio.getTurnoPorVoluntario(voluntarioId)
+            _turnoActual.value = turno
         }
     }
 
-    suspend fun actualizarVoluntario(voluntario: Voluntario) {
-        voluntarioRepositorio.actualizarVoluntario(voluntario)
-    }
+    suspend fun getVoluntarioByUid(uid: String): Voluntario? = voluntarioRepositorio.getByUid(uid)
+    suspend fun contarVoluntarios(): Int = voluntarioRepositorio.contar()
+    suspend fun actualizarVoluntario(voluntario: Voluntario) = voluntarioRepositorio.actualizarVoluntario(voluntario)
 
-
-    suspend fun getVoluntarioByUid(uid: String): Voluntario? {
-        return voluntarioRepositorio.getByUid(uid)
-    }
-
-    fun getTurnosUsuario(uid: String) {
+    fun insertar(turno: Turno) {
         viewModelScope.launch {
-            repositorio.getTurnosUsuario(uid).collect { turnos ->
-                _turnos.value = turnos
-            }
+            repositorio.insertar(turno)
         }
     }
 
     suspend fun getTurnoPorVoluntario(voluntarioId: Long): Turno? {
         return repositorio.getTurnoPorVoluntario(voluntarioId)
-    }
-
-    suspend fun contarVoluntarios(): Int {
-        return voluntarioRepositorio.contar()
     }
 
     class TurnoViewModelFactory(
@@ -54,8 +46,7 @@ class TurnoViewModel(private val repositorio: RepositorioTurno,private val volun
                 @Suppress("UNCHECKED_CAST")
                 return TurnoViewModel(turnoRepositorio, voluntarioRepositorio) as T
             }
-            throw IllegalArgumentException("Clase ViewModel desconocida")
+            throw IllegalArgumentException("Unknown ViewModel")
         }
     }
-
 }

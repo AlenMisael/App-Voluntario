@@ -1,11 +1,12 @@
 package com.example.voluntarios
 
 import android.app.Application
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
-class AppVoluntarios: Application() {
+class AppVoluntarios : Application() {
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     lateinit var syncManager: SyncManager
 
@@ -16,17 +17,15 @@ class AppVoluntarios: Application() {
     }
 
     val turnoRepositorio by lazy {
-        RepositorioTurno(database.turnoDao())
+        RepositorioTurno(database.turnoDao(), applicationContext)  // ← se pasa el contexto
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        val db = AppDatabase.getInstance(this)
-
         syncManager = SyncManager(
-            voluntarioDao = db.voluntarioDao(),
-            turnoDao = db.turnoDao(),
+            voluntarioDao = database.voluntarioDao(),
+            turnoDao = database.turnoDao(),
             scope = applicationScope
         )
 
@@ -34,18 +33,13 @@ class AppVoluntarios: Application() {
     }
 
     private fun iniciarSincronizacion() {
-
-        val voluntarioRepo = RepositorioVoluntario(
-            database.voluntarioDao(),
-            syncManager
-        )
-
-        val turnoRepo = RepositorioTurno(database.turnoDao())
-
+        val voluntarioRepo = RepositorioVoluntario(database.voluntarioDao(), syncManager)
         voluntarioRepo.escucharVoluntarios()
 
-        turnoRepo.escucharTurnos()
+        // Iniciar escucha de turnos solo si hay usuario logueado
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            turnoRepositorio.escucharTurnos(currentUser.uid)
+        }
     }
 }
-
-

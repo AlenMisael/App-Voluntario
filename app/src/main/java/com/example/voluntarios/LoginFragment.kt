@@ -1,6 +1,7 @@
 package com.example.voluntarios
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -19,15 +19,11 @@ import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-
-
 
     private val voluntarioViewModel: VoluntarioViewModel by viewModels {
         VoluntarioViewModel.VoluntarioViewModelFactory((activity?.application as AppVoluntarios).voluntarioRepositorio)
@@ -43,7 +39,6 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
 
         auth = FirebaseAuth.getInstance()
 
@@ -115,7 +110,7 @@ class LoginFragment : Fragment() {
                     return@registerForActivityResult
                 }
 
-                    val credential = GoogleAuthProvider.getCredential(idToken, null)
+                val credential = GoogleAuthProvider.getCredential(idToken, null)
 
                 auth.signInWithCredential(credential)
                     .addOnSuccessListener {
@@ -133,7 +128,6 @@ class LoginFragment : Fragment() {
                     .addOnFailureListener { e ->
                         Toast.makeText(requireContext(), e.message ?: "Error en login con Google", Toast.LENGTH_SHORT).show()
                     }
-
             } catch (e: ApiException) {
                 Toast.makeText(requireContext(), "Error en login con Google", Toast.LENGTH_SHORT).show()
             }
@@ -144,20 +138,19 @@ class LoginFragment : Fragment() {
         email: String,
         displayName: String
     ) {
-            val partes = displayName.trim().split(" ").filter { it.isNotBlank() }
-            val nombre = partes.firstOrNull() ?: "Usuario"
-            val apellido = if (partes.size > 1) partes.drop(1).joinToString(" ") else ""
+        val partes = displayName.trim().split(" ").filter { it.isNotBlank() }
+        val nombre = partes.firstOrNull() ?: "Usuario"
+        val apellido = if (partes.size > 1) partes.drop(1).joinToString(" ") else ""
 
-            val voluntario = Voluntario(
-                    firebaseUid = uid,
-                    nombre = nombre,
-                    apellido = apellido,
-                    fechaNac = "",
-                    email = email
-                )
-            voluntarioViewModel.insertar(voluntario)
-
-            }
+        val voluntario = Voluntario(
+            firebaseUid = uid,
+            nombre = nombre,
+            apellido = apellido,
+            fechaNac = "",
+            email = email
+        )
+        voluntarioViewModel.insertar(voluntario)
+    }
 
     private fun irASolicitudTurno() {
         parentFragmentManager.beginTransaction()
