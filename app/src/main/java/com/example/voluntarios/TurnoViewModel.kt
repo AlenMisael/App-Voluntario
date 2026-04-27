@@ -5,45 +5,53 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.launch
 
-class TurnoViewModel(private val repositorio: RepositorioTurno,private val voluntarioRepositorio: RepositorioVoluntario
-): ViewModel() {
+class TurnoViewModel(
+    private val turnoRepositorio: RepositorioTurno,
+    private val voluntarioRepositorio: RepositorioVoluntario
+) : ViewModel() {
 
     private val _turnos = MutableLiveData<List<Turno>>()
     val turnos: LiveData<List<Turno>> = _turnos
 
-    fun insertar(turno: Turno) {
-        viewModelScope.launch {
-            val id = repositorio.insertar(turno)
-            turno.id = id
+    private var listenerRegistration: ListenerRegistration? = null
+
+    fun startListening() {
+        listenerRegistration = turnoRepositorio.escucharTurnos { lista ->
+            _turnos.postValue(lista)
         }
     }
 
-    suspend fun actualizarVoluntario(voluntario: Voluntario) {
-        voluntarioRepositorio.actualizarVoluntario(voluntario)
+    init {
+        startListening()
     }
 
+
+    fun stopListening() {
+        listenerRegistration?.remove()
+        listenerRegistration = null
+    }
+
+    suspend fun insertar(turno: Turno): String? {
+        return turnoRepositorio.insertar(turno)
+    }
+
+    suspend fun getTurnoPorUidVoluntario(uid: String): Turno? {
+        return turnoRepositorio.getTurnoPorUidVoluntario(uid)
+    }
 
     suspend fun getVoluntarioByUid(uid: String): Voluntario? {
         return voluntarioRepositorio.getByUid(uid)
     }
 
-    fun getTurnosUsuario(uid: String) {
-        viewModelScope.launch {
-            repositorio.getTurnosUsuario(uid).collect { turnos ->
-                _turnos.value = turnos
-            }
-        }
+    override fun onCleared() {
+        super.onCleared()
+        stopListening()
     }
 
-    suspend fun getTurnoPorVoluntario(voluntarioId: Long): Turno? {
-        return repositorio.getTurnoPorVoluntario(voluntarioId)
-    }
 
-    suspend fun contarVoluntarios(): Int {
-        return voluntarioRepositorio.contar()
-    }
 
     class TurnoViewModelFactory(
         private val turnoRepositorio: RepositorioTurno,
@@ -54,8 +62,7 @@ class TurnoViewModel(private val repositorio: RepositorioTurno,private val volun
                 @Suppress("UNCHECKED_CAST")
                 return TurnoViewModel(turnoRepositorio, voluntarioRepositorio) as T
             }
-            throw IllegalArgumentException("Clase ViewModel desconocida")
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
-
 }

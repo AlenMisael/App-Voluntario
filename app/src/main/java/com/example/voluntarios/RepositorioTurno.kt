@@ -3,6 +3,7 @@ package com.example.voluntarios
 import android.util.Log
 import androidx.annotation.WorkerThread
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,7 @@ class RepositorioTurno(private val turnoDao: TurnoDao) {
     private val db = FirebaseFirestore.getInstance()
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    suspend fun insertar(turno: Turno): Long {
+    suspend fun insertar(turno: Turno): String? {
 
         val turnoFirestore = hashMapOf(
             "uidVoluntario" to turno.voluntariouid,
@@ -29,71 +30,60 @@ class RepositorioTurno(private val turnoDao: TurnoDao) {
             val docRef = db.collection("turnos")
                 .add(turnoFirestore)
                 .await()
-
-            val firestoreId = docRef.id
-
-            val turnoConId = turno.copy(
-                fireStoreid = firestoreId
-            )
-
-            turnoDao.insert(turnoConId)
-
+            docRef.id
         } catch (e: Exception) {
             Log.e("Firestore", "Error guardando turno", e)
-            -1
+            null
         }
     }
 
 
-    fun escucharTurnos() {
+    fun escucharTurnos(onChange: (List<Turno>) -> Unit): ListenerRegistration {
+        return db.collection("turnos")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
 
-        db.collection("turnos")
-            .addSnapshotListener { snapshot, _ ->
-                if (snapshot == null) return@addSnapshotListener
-
-                val documentos = snapshot.documents
-
-                    CoroutineScope(Dispatchers.IO).launch {
-
-
-
-                        val idsFirestore = snapshot.documents.map { it.id }
-
-                        val lista = snapshot.documents.mapNotNull { doc ->
-
-                            val uid = doc.getString("uidVoluntario") ?: return@mapNotNull null
-
-
-                            Turno(
-                                voluntarioId = null,
-                                voluntariouid = uid,
-                                fireStoreid = doc.id,
-                                estado = doc.getString("estado") ?: "pendiente",
-                                dia = doc.getString("dia") ?: "",
-                                horario = doc.getString("horario") ?: "",
-                                direccion = doc.getString("direccion") ?: "",
-                                descripcion = doc.getString("descripcion") ?: ""
-                            )
-                        }
-                        if (documentos.isEmpty()) {
-                            turnoDao.deleteAll()
-                        }
-                        else {
-                            if (idsFirestore.isNotEmpty()) {
-                                turnoDao.deleteNotIn(idsFirestore)
-                            }
-                            turnoDao.insertAll(lista)
-                        }
-
-                    }
+                val lista = snapshot.documents.mapNotNull { doc ->
+                    val uid = doc.getString("uidVoluntario") ?: return@mapNotNull null
+                    Turno(
+                        fireStoreid = doc.id,
+                        voluntarioId = null,
+                        voluntariouid = uid,
+                        estado = doc.getString("estado") ?: "pendiente",
+                        dia = doc.getString("dia") ?: "",
+                        horario = doc.getString("horario") ?: "",
+                        direccion = doc.getString("direccion") ?: "",
+                        descripcion = doc.getString("descripcion") ?: ""
+                    )
                 }
-
+                onChange(lista)
+            }
     }
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun getTurnoPorVoluntario(voluntarioId: Long): Turno? {
-        return turnoDao.getTurnoPorVoluntario(voluntarioId)
+    suspend fun getTurnoPorUidVoluntario(uid: String): Turno? {
+        return try {
+            val snapshot = db.collection("turnos")
+                .whereEqualTo("uidVoluntario", uid)
+                .limit(1)
+                .get()
+                .await()
+
+            val doc = snapshot.documents.firstOrNull() ?: return null
+
+            Turno(
+                fireStoreid = doc.id,
+                voluntarioId = null,
+                voluntariouid = uid,
+                estado = doc.getString("estado") ?: "pendiente",
+                dia = doc.getString("dia") ?: "",
+                horario = doc.getString("horario") ?: "",
+                direccion = doc.getString("direccion") ?: "",
+                descripcion = doc.getString("descripcion") ?: ""
+            )
+        } catch (e: Exception) {
+            Log.e("RepositorioTurno", "Error obteniendo turno", e)
+            null
+        }
     }
 
     @Suppress("RedundantSuspendModifier")

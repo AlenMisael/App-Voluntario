@@ -15,22 +15,30 @@ class VoluntarioViewModel (private val repositorio: RepositorioVoluntario): View
 
     fun insertar(voluntario: Voluntario) {
         viewModelScope.launch(Dispatchers.IO) {
-            val id = repositorio.insertar(voluntario)
-
-            if (id != -1L) {
-                voluntario.id = id
-                _voluntario.postValue(voluntario)
+            val existente = repositorio.getByUid(voluntario.firebaseUid)
+            if (existente == null) {
+                repositorio.insertar(voluntario)
             }
+            _voluntario.postValue(existente ?: voluntario)
 
         }
     }
+
     suspend fun getByUid(uid: String): Voluntario? {
         return repositorio.getByUid(uid)
     }
 
+    suspend fun actualizarVoluntario(voluntario: Voluntario) {
+        repositorio.actualizarVoluntario(voluntario)
+    }
 
 
-        class VoluntarioViewModelFactory(private val repositorio: RepositorioVoluntario) :
+    suspend fun contarVoluntarios(): Int {
+        return repositorio.contar()
+    }
+
+
+    class VoluntarioViewModelFactory(private val repositorio: RepositorioVoluntario) :
             ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(VoluntarioViewModel::class.java)) {

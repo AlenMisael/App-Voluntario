@@ -76,10 +76,8 @@ class RegistroFragment : Fragment() {
                             fechaNac = fechaNac,
                             email = email
                         )
+                        voluntarioViewModel.insertar(voluntario)
 
-                        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                            voluntarioViewModel.insertar(voluntario)
-                        }
                     }
 
                     Toast.makeText(requireContext(), "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()

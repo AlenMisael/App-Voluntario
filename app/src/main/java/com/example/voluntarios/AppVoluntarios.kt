@@ -30,22 +30,8 @@ class AppVoluntarios: Application() {
             scope = applicationScope
         )
 
-        iniciarSincronizacion()
     }
 
-    private fun iniciarSincronizacion() {
-
-        val voluntarioRepo = RepositorioVoluntario(
-            database.voluntarioDao(),
-            syncManager
-        )
-
-        val turnoRepo = RepositorioTurno(database.turnoDao())
-
-        voluntarioRepo.escucharVoluntarios()
-
-        turnoRepo.escucharTurnos()
-    }
 }
 
 

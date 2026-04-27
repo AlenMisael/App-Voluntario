@@ -2,12 +2,14 @@ package com.example.voluntarios
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -34,6 +36,10 @@ class SolicitudTurnoFragment : Fragment() {
         )
     }
 
+    private val voluntarioViewModel: VoluntarioViewModel by viewModels {
+        VoluntarioViewModel.VoluntarioViewModelFactory((activity?.application as AppVoluntarios).voluntarioRepositorio)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,7 +55,7 @@ class SolicitudTurnoFragment : Fragment() {
         tvMensaje: TextView,
         tvEstado: TextView
     ) {
-        val totalVoluntarios = turnoViewModel.contarVoluntarios()
+        val totalVoluntarios = voluntarioViewModel.contarVoluntarios()
 
         val card = cardEstado as MaterialCardView
 
@@ -95,6 +101,8 @@ class SolicitudTurnoFragment : Fragment() {
         val cardEstado = view.findViewById<View>(R.id.cardEstado)
         val tvMensaje = view.findViewById<TextView>(R.id.tvMensajeExito)
         val tvEstado = view.findViewById<TextView>(R.id.tvEstadoTurno)
+        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+
 
         super.onViewCreated(view, savedInstanceState)
         val btnCerrarSesion = view.findViewById<Button>(R.id.btnCerrarSesion)
@@ -104,23 +112,35 @@ class SolicitudTurnoFragment : Fragment() {
         val user = auth.currentUser
 
         if (user != null) {
+            progressBar.visibility = View.VISIBLE
+            layoutFormulario.visibility = View.GONE
+            cardEstado.visibility = View.GONE
             viewLifecycleOwner.lifecycleScope.launch {
+
+
                 val voluntario = turnoViewModel.getVoluntarioByUid(user.uid)
+
+                progressBar.visibility = View.GONE
 
                 if (voluntario != null) {
 
-                    val turno = turnoViewModel.getTurnoPorVoluntario(voluntario.id)
+                    val turno = turnoViewModel.getTurnoPorUidVoluntario(user.uid)
+
+                    Log.d("SolicitudTurno", "Turno encontrado: $turno")
+
 
                     if (turno != null) {
                         mostrarEstado(turno,voluntario,layoutFormulario, cardEstado, tvMensaje, tvEstado)
                     }
                     else {
-                        voluntario?.let {
-                            etNombre.setText(it.nombre)
-                            etApellido.setText(it.apellido)
-                            etFecha.setText(it.fechaNac)
-                        }
+                        etNombre.setText(voluntario.nombre)
+                        etApellido.setText(voluntario.apellido)
+                        etFecha.setText(voluntario.fechaNac)
+                        layoutFormulario.visibility = View.VISIBLE
                     }
+                    }
+                else {
+                    layoutFormulario.visibility = View.VISIBLE
                 }
 
             }
@@ -175,11 +195,11 @@ class SolicitudTurnoFragment : Fragment() {
                         fechaNac = fecha
                     )
 
-                    turnoViewModel.actualizarVoluntario(voluntarioActualizado)
+                    voluntarioViewModel.actualizarVoluntario(voluntarioActualizado)
 
                     val turno = Turno(
-                        voluntarioId = voluntario.id,
-                        voluntariouid = voluntario.firebaseUid,
+                        voluntarioId = null,
+                        voluntariouid = user.uid,
                         estado = "pendiente"
                     )
 
