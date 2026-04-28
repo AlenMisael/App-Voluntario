@@ -1,7 +1,5 @@
 package com.example.voluntarios
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,8 +11,8 @@ class TurnoViewModel(
     private val voluntarioRepositorio: RepositorioVoluntario
 ) : ViewModel() {
 
-    private val _turnos = MutableLiveData<List<Turno>>()
-    val turnos: LiveData<List<Turno>> = _turnos
+    private val _turnoActual = MutableStateFlow<Turno?>(null)
+    val turnoActual: StateFlow<Turno?> = _turnoActual.asStateFlow()
 
     private var listenerRegistration: ListenerRegistration? = null
 
