@@ -101,6 +101,7 @@ class SolicitudTurnoFragment : Fragment() {
         val tvMensaje = view.findViewById<TextView>(R.id.tvMensajeExito)
         val tvEstado = view.findViewById<TextView>(R.id.tvEstadoTurno)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+        val btnGuardarTurno = view.findViewById<Button>(R.id.btnGuardarTurno)
 
 
         super.onViewCreated(view, savedInstanceState)
@@ -185,7 +186,7 @@ class SolicitudTurnoFragment : Fragment() {
                         voluntariouid = user.uid,
                         estado = "pendiente"
                     )
-                    turnoViewModel.insertar(nuevoTurno)
+                    turnoViewModel.insertar(turno)
 
                     // 🔔 SUSCRIPCIÓN AUTOMÁTICA CON TÓPICO PERSONALIZADO
                     val topic = TopicHelper.generarTopic(voluntario.firebaseUid, voluntario.nombre)
@@ -205,7 +206,7 @@ class SolicitudTurnoFragment : Fragment() {
         tvMensaje: TextView,
         tvEstado: TextView
     ) {
-        val totalVoluntarios = turnoViewModel.contarVoluntarios()
+        val totalVoluntarios = voluntarioViewModel.contarVoluntarios()
         val card = cardEstado as MaterialCardView
 
         val colorFondo = when (turno.estado.lowercase()) {

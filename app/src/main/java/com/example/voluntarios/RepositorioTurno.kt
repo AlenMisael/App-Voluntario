@@ -94,77 +94,81 @@ class RepositorioTurno(
             Log.e("RepositorioTurno", "Error obteniendo turno", e)
             null
         }
-    // NUEVO: escucha SOLO los turnos del voluntario actual
-    fun escucharTurnos(uidVoluntario: String) {
-        db.collection("turnos")
-            .whereEqualTo("uidVoluntario", uidVoluntario)   // ← filtro importante
-            .addSnapshotListener { snapshot, _ ->
-                if (snapshot == null) return@addSnapshotListener
-                CoroutineScope(Dispatchers.IO).launch {
-                    val lista = snapshot.documents.mapNotNull { doc ->
-                        Turno(
-                            voluntarioId = null,
-                            voluntariouid = doc.getString("uidVoluntario") ?: return@mapNotNull null,
-                            fireStoreid = doc.id,
-                            estado = doc.getString("estado") ?: "pendiente",
-                            dia = doc.getString("dia") ?: "",
-                            horario = doc.getString("horario") ?: "",
-                            direccion = doc.getString("direccion") ?: "",
-                            descripcion = doc.getString("descripcion") ?: ""
-                        )
-                    }
-                    // Actualizar Room
-                    turnoDao.deleteAll()
-                    if (lista.isNotEmpty()) {
-                        turnoDao.insertAll(lista)
-                    }
-                    // Notificar localmente si el turno fue confirmado o cancelado
-                    val turnoActual = lista.firstOrNull()
-                    turnoActual?.let {
-                        when (it.estado) {
-                            "confirmado" -> mostrarNotificacionLocal(
-                                "Turno confirmado",
-                                "Día: ${it.dia} ${it.horario}\nDirección: ${it.direccion}\n${it.descripcion}"
+    }
+        // NUEVO: escucha SOLO los turnos del voluntario actual
+        fun escucharTurnos(uidVoluntario: String) {
+            db.collection("turnos")
+                .whereEqualTo("uidVoluntario", uidVoluntario)   // ← filtro importante
+                .addSnapshotListener { snapshot, _ ->
+                    if (snapshot == null) return@addSnapshotListener
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val lista = snapshot.documents.mapNotNull { doc ->
+                            Turno(
+                                voluntarioId = null,
+                                voluntariouid = doc.getString("uidVoluntario")
+                                    ?: return@mapNotNull null,
+                                fireStoreid = doc.id,
+                                estado = doc.getString("estado") ?: "pendiente",
+                                dia = doc.getString("dia") ?: "",
+                                horario = doc.getString("horario") ?: "",
+                                direccion = doc.getString("direccion") ?: "",
+                                descripcion = doc.getString("descripcion") ?: ""
                             )
-                            "rechazado" -> mostrarNotificacionLocal(
-                                "Turno cancelado",
-                                "Motivo: ${it.descripcion}"
-                            )
+                        }
+                        // Actualizar Room
+                        turnoDao.deleteAll()
+                        if (lista.isNotEmpty()) {
+                            turnoDao.insertAll(lista)
+                        }
+                        // Notificar localmente si el turno fue confirmado o cancelado
+                        val turnoActual = lista.firstOrNull()
+                        turnoActual?.let {
+                            when (it.estado) {
+                                "confirmado" -> mostrarNotificacionLocal(
+                                    "Turno confirmado",
+                                    "Día: ${it.dia} ${it.horario}\nDirección: ${it.direccion}\n${it.descripcion}"
+                                )
+
+                                "rechazado" -> mostrarNotificacionLocal(
+                                    "Turno cancelado",
+                                    "Motivo: ${it.descripcion}"
+                                )
+                            }
                         }
                     }
                 }
-            }
-    }
-
-    private fun mostrarNotificacionLocal(titulo: String, cuerpo: String) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "turnos_channel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Turnos",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            notificationManager.createNotificationChannel(channel)
         }
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(titulo)
-            .setContentText(cuerpo)
-            .setAutoCancel(true)
-            .build()
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
-    }
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun getTurnoPorVoluntario(voluntarioId: Long): Turno? {
-        return turnoDao.getTurnoPorVoluntario(voluntarioId)
-    }
+        private fun mostrarNotificacionLocal(titulo: String, cuerpo: String) {
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channelId = "turnos_channel"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    channelId,
+                    "Turnos",
+                    NotificationManager.IMPORTANCE_HIGH
+                )
+                notificationManager.createNotificationChannel(channel)
+            }
+            val notification = NotificationCompat.Builder(context, channelId)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(titulo)
+                .setContentText(cuerpo)
+                .setAutoCancel(true)
+                .build()
+            notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        }
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun getTurnosUsuario(uid: String): Flow<List<Turno>> {
-        return turnoDao.getTurnosDeUsuario(uid)
+        @Suppress("RedundantSuspendModifier")
+        @WorkerThread
+        suspend fun getTurnoPorVoluntario(voluntarioId: Long): Turno? {
+            return turnoDao.getTurnoPorVoluntario(voluntarioId)
+        }
+
+        @Suppress("RedundantSuspendModifier")
+        @WorkerThread
+        suspend fun getTurnosUsuario(uid: String): Flow<List<Turno>> {
+            return turnoDao.getTurnosDeUsuario(uid)
+        }
     }
-}
