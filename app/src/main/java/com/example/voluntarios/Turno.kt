@@ -26,5 +26,6 @@ data class Turno(
     val horario: String = "",
     val direccion: String = "",
     val descripcion: String = "",
-    val estado: String = "pendiente"
+    val estado: String = "pendiente",
+    val asignado: Boolean = false
 )

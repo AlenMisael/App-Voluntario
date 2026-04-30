@@ -1,5 +1,6 @@
 package com.example.voluntarios
 
+import android.adservices.topics.Topic
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -55,30 +56,40 @@ class SolicitudTurnoFragment : Fragment() {
         tvEstado: TextView
     ) {
         val totalVoluntarios = voluntarioViewModel.contarVoluntarios()
-
         val card = cardEstado as MaterialCardView
 
         val colorFondo = when (turno.estado.lowercase()) {
-            "pendiente" -> ContextCompat.getColor(requireContext(), R.color.estado_pendiente_bg)
+            "pendiente"  -> ContextCompat.getColor(requireContext(), R.color.estado_pendiente_bg)
             "confirmado" -> ContextCompat.getColor(requireContext(), R.color.estado_confirmado_bg)
-            "rechazado" -> ContextCompat.getColor(requireContext(), R.color.estado_rechazado_bg)
-            else -> ContextCompat.getColor(requireContext(), android.R.color.white)
+            "rechazado"  -> ContextCompat.getColor(requireContext(), R.color.estado_rechazado_bg)
+            else         -> ContextCompat.getColor(requireContext(), android.R.color.white)
         }
-
         card.setCardBackgroundColor(colorFondo)
 
-
-
         tvEstado.text = when (turno.estado.lowercase()) {
-            "pendiente" -> "Estado del turno: Pendiente"
+            "pendiente"  -> "Estado del turno: Pendiente"
             "confirmado" -> "Estado del turno: Confirmado"
-            "rechazado" -> "Estado del turno: Rechazado"
-            else -> "Estado: ${turno.estado}"
+            "rechazado"  -> "Estado del turno: Rechazado"
+            else         -> "Estado: ${turno.estado}"
         }
 
-        tvMensaje.text = "Muchas gracias ${voluntario.nombre}, ${voluntario.apellido}  por querer participar en el sistema de encuestas. " +
-                "Somos $totalVoluntarios voluntarios en total. " +
-                "Se te notificará por este medio cuando tu turno haya sido confirmado."
+        tvMensaje.text = when (turno.estado.lowercase()) {
+            "confirmado" -> buildString {
+                append("¡Felicitades ${voluntario.nombre} ${voluntario.apellido}! ")
+                append("Somos $totalVoluntarios voluntarios. ")
+                append("Tu turno será el ${turno.dia} a las ${turno.horario} en ${turno.direccion}. ")
+                append("Instrucciones: ${turno.descripcion}")
+            }
+            "rechazado" -> buildString {
+                append("Lamentamos informarte que tu turno ha sido cancelado, ${voluntario.nombre}. ")
+                append("Motivo: ${turno.descripcion}")
+            }
+            else -> buildString {
+                append("Muchas gracias ${voluntario.nombre} ${voluntario.apellido} ")
+                append("por querer participar en el sistema de encuestas. ")
+                append("Se te notificará por este medio cuando tu turno haya sido confirmado.")
+            }
+        }
 
         layoutFormulario.visibility = View.GONE
         cardEstado.visibility = View.VISIBLE
@@ -188,7 +199,6 @@ class SolicitudTurnoFragment : Fragment() {
                     )
                     turnoViewModel.insertar(turno)
 
-                    // 🔔 SUSCRIPCIÓN AUTOMÁTICA CON TÓPICO PERSONALIZADO
                     val topic = TopicHelper.generarTopic(voluntario.firebaseUid, voluntario.nombre)
                     suscribirseANtfy(topic)
 
@@ -196,49 +206,6 @@ class SolicitudTurnoFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private suspend fun actualizarUI(
-        turno: Turno,
-        voluntario: Voluntario,
-        layoutFormulario: View,
-        cardEstado: View,
-        tvMensaje: TextView,
-        tvEstado: TextView
-    ) {
-        val totalVoluntarios = voluntarioViewModel.contarVoluntarios()
-        val card = cardEstado as MaterialCardView
-
-        val colorFondo = when (turno.estado.lowercase()) {
-            "pendiente" -> ContextCompat.getColor(requireContext(), R.color.estado_pendiente_bg)
-            "confirmado" -> ContextCompat.getColor(requireContext(), R.color.estado_confirmado_bg)
-            "rechazado" -> ContextCompat.getColor(requireContext(), R.color.estado_rechazado_bg)
-            else -> ContextCompat.getColor(requireContext(), android.R.color.white)
-        }
-        card.setCardBackgroundColor(colorFondo)
-
-        tvEstado.text = when (turno.estado.lowercase()) {
-            "pendiente" -> "Estado: Pendiente"
-            "confirmado" -> "Estado: Confirmado"
-            "rechazado" -> "Estado: Rechazado"
-            else -> "Estado: ${turno.estado}"
-        }
-
-        val mensaje = when (turno.estado) {
-            "confirmado" -> buildString {
-                append("Muchas gracias ${voluntario.nombre} ${voluntario.apellido}. ")
-                append("Somos $totalVoluntarios voluntarios. ")
-                append("Tu turno será el ${turno.dia} a las ${turno.horario} en ${turno.direccion}. ")
-                append("Instrucciones: ${turno.descripcion}")
-            }
-            "rechazado" -> "Lamentamos informarte que tu turno ha sido cancelado. Motivo: ${turno.descripcion}"
-            else -> "Muchas gracias ${voluntario.nombre} ${voluntario.apellido} por querer participar. " +
-                    "Se te notificará cuando tu turno sea confirmado."
-        }
-        tvMensaje.text = mensaje
-
-        layoutFormulario.visibility = View.GONE
-        cardEstado.visibility = View.VISIBLE
     }
 
     private fun suscribirseANtfy(topic: String) {
