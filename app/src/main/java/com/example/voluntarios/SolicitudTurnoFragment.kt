@@ -16,7 +16,9 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -34,6 +36,10 @@ class SolicitudTurnoFragment : Fragment() {
             (requireActivity().application as AppVoluntarios).turnoRepositorio,
             (requireActivity().application as AppVoluntarios).voluntarioRepositorio
         )
+    }
+
+    private val encuestaViewModel: EncuestaViewModel by viewModels {
+        EncuestaViewModel.EncuestaViewModelFactory((activity?.application as AppVoluntarios).encuestaRepositorio)
     }
 
     private val voluntarioViewModel: VoluntarioViewModel by viewModels {
@@ -59,18 +65,18 @@ class SolicitudTurnoFragment : Fragment() {
         val card = cardEstado as MaterialCardView
 
         val colorFondo = when (turno.estado.lowercase()) {
-            "pendiente"  -> ContextCompat.getColor(requireContext(), R.color.estado_pendiente_bg)
+            "pendiente" -> ContextCompat.getColor(requireContext(), R.color.estado_pendiente_bg)
             "confirmado" -> ContextCompat.getColor(requireContext(), R.color.estado_confirmado_bg)
-            "rechazado"  -> ContextCompat.getColor(requireContext(), R.color.estado_rechazado_bg)
-            else         -> ContextCompat.getColor(requireContext(), android.R.color.white)
+            "rechazado" -> ContextCompat.getColor(requireContext(), R.color.estado_rechazado_bg)
+            else -> ContextCompat.getColor(requireContext(), android.R.color.white)
         }
         card.setCardBackgroundColor(colorFondo)
 
         tvEstado.text = when (turno.estado.lowercase()) {
-            "pendiente"  -> "Estado del turno: Pendiente"
+            "pendiente" -> "Estado del turno: Pendiente"
             "confirmado" -> "Estado del turno: Confirmado"
-            "rechazado"  -> "Estado del turno: Rechazado"
-            else         -> "Estado: ${turno.estado}"
+            "rechazado" -> "Estado del turno: Rechazado"
+            else -> "Estado: ${turno.estado}"
         }
 
         tvMensaje.text = when (turno.estado.lowercase()) {
@@ -80,10 +86,12 @@ class SolicitudTurnoFragment : Fragment() {
                 append("Tu turno será el ${turno.dia} a las ${turno.horario} en ${turno.direccion}. ")
                 append("Instrucciones: ${turno.descripcion}")
             }
+
             "rechazado" -> buildString {
                 append("Lamentamos informarte que tu turno ha sido cancelado, ${voluntario.nombre}. ")
                 append("Motivo: ${turno.descripcion}")
             }
+
             else -> buildString {
                 append("Muchas gracias ${voluntario.nombre} ${voluntario.apellido} ")
                 append("por querer participar en el sistema de encuestas. ")
@@ -125,8 +133,6 @@ class SolicitudTurnoFragment : Fragment() {
             layoutFormulario.visibility = View.GONE
             cardEstado.visibility = View.GONE
             viewLifecycleOwner.lifecycleScope.launch {
-
-
                 val voluntario = turnoViewModel.getVoluntarioByUid(user.uid)
 
                 progressBar.visibility = View.GONE
@@ -139,21 +145,23 @@ class SolicitudTurnoFragment : Fragment() {
 
 
                     if (turno != null) {
-                        mostrarEstado(turno,voluntario,layoutFormulario, cardEstado, tvMensaje, tvEstado)
-                    }
-                    else {
-                        etNombre.setText(voluntario.nombre)
-                        etApellido.setText(voluntario.apellido)
-                        etFecha.setText(voluntario.fechaNac)
+                        mostrarEstado(turno, voluntario, layoutFormulario, cardEstado, tvMensaje, tvEstado)
+
+                    } else {
+                            etNombre.setText(voluntario.nombre)
+                            etApellido.setText(voluntario.apellido)
+                            etFecha.setText(voluntario.fechaNac)
+                            layoutFormulario.visibility = View.VISIBLE
+                        }
+                    } else {
                         layoutFormulario.visibility = View.VISIBLE
                     }
-                    }
-                else {
-                    layoutFormulario.visibility = View.VISIBLE
-                }
+
 
             }
         }
+
+
 
 
 
@@ -171,14 +179,19 @@ class SolicitudTurnoFragment : Fragment() {
 
         btnGuardarTurno.setOnClickListener {
             if (user == null) {
-                Toast.makeText(requireContext(), "No hay usuario logueado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "No hay usuario logueado", Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
             val nombre = etNombre.text.toString().trim()
             val apellido = etApellido.text.toString().trim()
             val fecha = etFecha.text.toString().trim()
             if (nombre.isEmpty() || apellido.isEmpty() || fecha.isEmpty()) {
-                Toast.makeText(requireContext(), "Completá todos los campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Completá todos los campos",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
             lifecycleScope.launch {
@@ -199,14 +212,51 @@ class SolicitudTurnoFragment : Fragment() {
                     )
                     turnoViewModel.insertar(turno)
 
-                    val topic = TopicHelper.generarTopic(voluntario.firebaseUid, voluntario.nombre)
+                    val topic =
+                        TopicHelper.generarTopic(voluntario.firebaseUid, voluntario.nombre)
                     suscribirseANtfy(topic)
 
-                    Toast.makeText(requireContext(), "Turno solicitado (pendiente)", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Turno solicitado (pendiente)",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
     }
+
+    /*
+
+    private fun mostrarEncuestaCompleta(
+        view: View,
+        turno: Turno,
+        layoutFormulario: View,
+        cardEstado: View
+    ) {
+        val cardEncuestaCompleta = view.findViewById<View>(R.id.cardResumenEncuesta)
+        val tvFelicitaciones = view.findViewById<TextView>(R.id.tvFelicitacionesEncuesta)
+        val tvDiaResumen = view.findViewById<TextView>(R.id.tvResumenDia)
+        val tvHorarioResumen = view.findViewById<TextView>(R.id.tvResumenHorario)
+        val tvDireccionResumen = view.findViewById<TextView>(R.id.tvResumenDireccion)
+        val btnVerResumen = view.findViewById<Button>(R.id.btnVerDetalleEncuesta)
+
+        layoutFormulario.visibility = View.GONE
+        cardEstado.visibility = View.GONE
+        cardEncuestaCompleta.visibility = View.VISIBLE
+
+        tvDiaResumen.text = "Fecha: ${turno.dia}"
+        tvHorarioResumen.text = "Horario: ${turno.horario}"
+        tvDireccionResumen.text = "Dirección: ${turno.direccion}"
+
+        btnVerResumen.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, ResumenEncuestaFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+*/
 
     private fun suscribirseANtfy(topic: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("ntfy://ntfy.sh/$topic?auto-subscribe=1"))

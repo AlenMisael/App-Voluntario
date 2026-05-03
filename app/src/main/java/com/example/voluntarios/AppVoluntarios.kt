@@ -16,6 +16,10 @@ class AppVoluntarios : Application() {
         RepositorioVoluntario(database.voluntarioDao(), syncManager)
     }
 
+    val encuestaRepositorio by lazy {
+        RepositorioEncuestas()
+    }
+
     val turnoRepositorio by lazy {
         RepositorioTurno(database.turnoDao(), applicationContext)  // ← se pasa el contexto
     }

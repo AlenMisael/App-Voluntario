@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 
 class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao, private val syncManager: SyncManager) {
@@ -14,60 +15,66 @@ class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao, private va
     private val db = FirebaseFirestore.getInstance()
 
 
-
     suspend fun insertar(voluntario: Voluntario) {
+        withContext(Dispatchers.IO) {
 
 
-        val voluntarioFirestore = hashMapOf(
-            "firebaseUid" to voluntario.firebaseUid,
-            "nombre" to voluntario.nombre,
-            "apellido" to voluntario.apellido,
-            "fechaNac" to voluntario.fechaNac,
-            "email" to voluntario.email
-        )
+            val voluntarioFirestore = hashMapOf(
+                "firebaseUid" to voluntario.firebaseUid,
+                "nombre" to voluntario.nombre,
+                "apellido" to voluntario.apellido,
+                "fechaNac" to voluntario.fechaNac,
+                "email" to voluntario.email
+            )
 
-        try {
-            db.collection("voluntarios")
-                .document(voluntario.firebaseUid)
-                .set(voluntarioFirestore)
-                .await()
+            try {
+                db.collection("voluntarios")
+                    .document(voluntario.firebaseUid)
+                    .set(voluntarioFirestore)
+                    .await()
 
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error guardando voluntario", e)
+            } catch (e: Exception) {
+                Log.e("Firestore", "Error guardando voluntario", e)
+            }
         }
     }
 
     suspend fun getByUid(uid: String): Voluntario? {
-        return try {
-            val doc = db.collection("voluntarios")
-                .document(uid)
-                .get()
-                .await()
+        return withContext(Dispatchers.IO) {
+            try {
+                val doc = db.collection("voluntarios")
+                    .document(uid)
+                    .get()
+                    .await()
 
-            if (!doc.exists()) return null
+                if (!doc.exists()) return@withContext null
 
-            Voluntario(
-                firebaseUid = uid,
-                nombre = doc.getString("nombre") ?: "",
-                apellido = doc.getString("apellido") ?: "",
-                fechaNac = doc.getString("fechaNac") ?: "",
-                email = doc.getString("email") ?: ""
-            )
-        } catch (e: Exception) {
-            Log.e("RepositorioVoluntario", "Error obteniendo voluntario", e)
-            null
+                Voluntario(
+                    firebaseUid = uid,
+                    nombre = doc.getString("nombre") ?: "",
+                    apellido = doc.getString("apellido") ?: "",
+                    fechaNac = doc.getString("fechaNac") ?: "",
+                    email = doc.getString("email") ?: ""
+                )
+            } catch (e: Exception) {
+                Log.e("RepositorioVoluntario", "Error obteniendo voluntario", e)
+                null
+            }
         }
     }
 
     suspend fun contar(): Int {
-        return try {
-            val snapshot = db.collection("voluntarios").get().await()
-            snapshot.size()
-        } catch (e: Exception) {
-            Log.e("RepositorioVoluntario", "Error contando voluntarios", e)
-            0
+        return withContext(Dispatchers.IO) {
+            try {
+                val snapshot = db.collection("voluntarios").get().await()
+                snapshot.size()
+            } catch (e: Exception) {
+                Log.e("RepositorioVoluntario", "Error contando voluntarios", e)
+                0
+            }
         }
     }
+
 
     suspend fun actualizar(voluntario: Voluntario) {
         val datos = hashMapOf(
@@ -123,23 +130,25 @@ class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao, private va
     }
 
     suspend fun actualizarVoluntario(voluntario: Voluntario) {
+        withContext(Dispatchers.IO) {
 
-        val voluntarioFirestore = hashMapOf(
-            "firebaseUid" to voluntario.firebaseUid,
-            "nombre" to voluntario.nombre,
-            "apellido" to voluntario.apellido,
-            "fechaNac" to voluntario.fechaNac,
-            "email" to voluntario.email
-        )
+            val voluntarioFirestore = hashMapOf(
+                "firebaseUid" to voluntario.firebaseUid,
+                "nombre" to voluntario.nombre,
+                "apellido" to voluntario.apellido,
+                "fechaNac" to voluntario.fechaNac,
+                "email" to voluntario.email
+            )
 
-        try {
-            db.collection("voluntarios")
-                .document(voluntario.firebaseUid)
-                .set(voluntarioFirestore)
-                .await()
+            try {
+                db.collection("voluntarios")
+                    .document(voluntario.firebaseUid)
+                    .set(voluntarioFirestore)
+                    .await()
 
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error actualizando voluntario", e)
+            } catch (e: Exception) {
+                Log.e("Firestore", "Error actualizando voluntario", e)
+            }
         }
     }
 
