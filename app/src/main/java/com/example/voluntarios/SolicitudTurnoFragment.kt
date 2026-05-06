@@ -83,8 +83,7 @@ class SolicitudTurnoFragment : Fragment() {
             "confirmado" -> buildString {
                 append("¡Felicitades ${voluntario.nombre} ${voluntario.apellido}! ")
                 append("Somos $totalVoluntarios voluntarios. ")
-                append("Tu turno será el ${turno.dia} a las ${turno.horario} en ${turno.direccion}. ")
-                append("Instrucciones: ${turno.descripcion}")
+                append("Tu turno será el dia ${turno.dia} a las ${turno.horario} horas en ${turno.direccion}. ")
             }
 
             "rechazado" -> buildString {
