@@ -71,6 +71,7 @@ class RepositorioTurno(
     }
 
     suspend fun getTurnoPorUidVoluntario(uid: String): Turno? {
+        Log.d("RepositorioTurno", "Buscando turno para uid: $uid")
         return try {
             val snapshot = db.collection("turnos")
                 .whereEqualTo("uidVoluntario", uid)

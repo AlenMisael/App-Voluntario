@@ -38,9 +38,6 @@ class SolicitudTurnoFragment : Fragment() {
         )
     }
 
-    private val encuestaViewModel: EncuestaViewModel by viewModels {
-        EncuestaViewModel.EncuestaViewModelFactory((activity?.application as AppVoluntarios).encuestaRepositorio)
-    }
 
     private val voluntarioViewModel: VoluntarioViewModel by viewModels {
         VoluntarioViewModel.VoluntarioViewModelFactory((activity?.application as AppVoluntarios).voluntarioRepositorio)
@@ -71,6 +68,14 @@ class SolicitudTurnoFragment : Fragment() {
             else -> ContextCompat.getColor(requireContext(), android.R.color.white)
         }
         card.setCardBackgroundColor(colorFondo)
+
+        val colorTexto = ContextCompat.getColor(
+            requireContext(),
+            R.color.texto_estado
+        )
+
+        tvEstado.setTextColor(colorTexto)
+        tvMensaje.setTextColor(colorTexto)
 
         tvEstado.text = when (turno.estado.lowercase()) {
             "pendiente" -> "Estado del turno: Pendiente"
@@ -211,6 +216,15 @@ class SolicitudTurnoFragment : Fragment() {
                     )
                     turnoViewModel.insertar(turno)
 
+                    mostrarEstado(
+                        turno = turno,
+                        voluntario = voluntarioActualizado,
+                        layoutFormulario = layoutFormulario,
+                        cardEstado = cardEstado,
+                        tvMensaje = tvMensaje,
+                        tvEstado = tvEstado
+                    )
+
                     val topic =
                         TopicHelper.generarTopic(voluntario.firebaseUid, voluntario.nombre)
                     suscribirseANtfy(topic)
@@ -258,14 +272,16 @@ class SolicitudTurnoFragment : Fragment() {
 */
 
     private fun suscribirseANtfy(topic: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("ntfy://ntfy.sh/$topic?auto-subscribe=1"))
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        Log.d("SolicitudTurno", "Topic: $topic")
+
+        val uri = Uri.parse("https://ntfy.sh/$topic")
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+
         try {
             startActivity(intent)
-            Log.d("SolicitudTurno", "Auto-suscrito a tópico: $topic")
         } catch (e: Exception) {
-            Log.w("SolicitudTurno", "App ntfy no instalada", e)
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://ntfy.sh/app")))
+            Log.w("SolicitudTurno", "Error abriendo ntfy", e)
+            Toast.makeText(requireContext(), "Topic: $topic", Toast.LENGTH_LONG).show()
         }
     }
 }

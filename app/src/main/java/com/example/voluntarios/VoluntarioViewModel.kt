@@ -13,15 +13,15 @@ class VoluntarioViewModel (private val repositorio: RepositorioVoluntario): View
     private val _voluntario = MutableLiveData<Voluntario?>()
     val voluntario: LiveData<Voluntario?> = _voluntario
 
-    fun insertar(voluntario: Voluntario) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val existente = repositorio.getByUid(voluntario.firebaseUid)
-            if (existente == null) {
-                repositorio.insertar(voluntario)
-            }
-            _voluntario.postValue(existente ?: voluntario)
+    suspend fun insertar(voluntario: Voluntario) {
 
+        val existente = repositorio.getByUid(voluntario.firebaseUid)
+
+        if (existente == null) {
+            repositorio.insertar(voluntario)
         }
+
+        _voluntario.postValue(existente ?: voluntario)
     }
 
     suspend fun getByUid(uid: String): Voluntario? {

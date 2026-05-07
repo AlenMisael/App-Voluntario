@@ -11,8 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+
 
 
 class RegistroFragment : Fragment() {
@@ -65,26 +66,55 @@ class RegistroFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            btnCrearCuenta.isEnabled = false
+            btnCrearCuenta.text = "Registrando..."
+
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    val user = auth.currentUser
-                    if (user != null) {
-                        val voluntario = Voluntario(
-                            firebaseUid = user.uid,
-                            nombre = nombre,
-                            apellido = apellido,
-                            fechaNac = fechaNac,
-                            email = email
-                        )
+
+                    if (!isAdded) return@addOnSuccessListener
+
+                    val user = auth.currentUser ?: return@addOnSuccessListener
+
+                    val voluntario = Voluntario(
+                        firebaseUid = user.uid,
+                        nombre = nombre,
+                        apellido = apellido,
+                        fechaNac = fechaNac,
+                        email = email
+                    )
+
+                    viewLifecycleOwner.lifecycleScope.launch {
+
                         voluntarioViewModel.insertar(voluntario)
+
+                        context?.let {
+                            Toast.makeText(
+                                it,
+                                "Usuario registrado correctamente",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        irASolicitudTurno()
 
                     }
 
-                    Toast.makeText(requireContext(), "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()
-                    irASolicitudTurno()
+
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(requireContext(), e.message ?: "Error al registrar", Toast.LENGTH_SHORT).show()
+                    if (!isAdded) return@addOnFailureListener
+
+                    btnCrearCuenta.isEnabled = true
+                    btnCrearCuenta.text = "Crear cuenta"
+
+                    context?.let {
+                        Toast.makeText(
+                            it,
+                            e.message ?: "Error al registrar",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
         }
 
@@ -96,6 +126,9 @@ class RegistroFragment : Fragment() {
     }
 
     private fun irASolicitudTurno() {
+
+        if (!isAdded) return
+
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, SolicitudTurnoFragment())
             .commit()

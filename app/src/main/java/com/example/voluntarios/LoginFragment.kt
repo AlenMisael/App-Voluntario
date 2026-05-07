@@ -64,21 +64,33 @@ class LoginFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            btnIngresar.isEnabled = false
+
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
+                    if (!isAdded) return@addOnSuccessListener
                     val user = auth.currentUser
-                    if (user != null) {
-                        guardarVoluntarioLocalSiNoExiste(
-                            uid = user.uid,
-                            email = user.email ?: email,
-                            displayName = user.displayName ?: email.substringBefore("@")
-                        )
+                    context?.let {
+                        Toast.makeText(
+                            it,
+                            "Bienvenido ${user?.email}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    Toast.makeText(requireContext(), "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
                     irASolicitudTurno()
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(requireContext(), e.message ?: "Error al iniciar sesión", Toast.LENGTH_SHORT).show()
+                    if (!isAdded) return@addOnFailureListener
+
+                    btnIngresar.isEnabled = true
+
+                    context?.let {
+                        Toast.makeText(
+                            it,
+                            e.message ?: "Error al iniciar sesión",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
         }
 
@@ -114,25 +126,40 @@ class LoginFragment : Fragment() {
 
                 auth.signInWithCredential(credential)
                     .addOnSuccessListener {
+
+                        if (!isAdded) return@addOnSuccessListener
                         val user = auth.currentUser
-                        if (user != null) {
-                            guardarVoluntarioLocalSiNoExiste(
-                                uid = user.uid,
-                                email = user.email ?: account.email.orEmpty(),
-                                displayName = user.displayName ?: account.displayName.orEmpty()
-                            )
+
+                        context?.let {
+                            Toast.makeText(
+                                it,
+                                "Bienvenido ${user?.displayName}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                        Toast.makeText(requireContext(), "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
+
                         irASolicitudTurno()
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(requireContext(), e.message ?: "Error en login con Google", Toast.LENGTH_SHORT).show()
+                        context?.let {
+                            Toast.makeText(
+                                it,
+                                e.message ?: "Error en login con Google",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
             } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Error en login con Google", Toast.LENGTH_SHORT).show()
+                if (!isAdded) return@registerForActivityResult
+
+                Toast.makeText(
+                    requireContext(),
+                    "Error en login con Google",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
-
+/*
     private fun guardarVoluntarioLocalSiNoExiste(
         uid: String,
         email: String,
@@ -151,7 +178,7 @@ class LoginFragment : Fragment() {
         )
         voluntarioViewModel.insertar(voluntario)
     }
-
+*/
     private fun irASolicitudTurno() {
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, SolicitudTurnoFragment())
