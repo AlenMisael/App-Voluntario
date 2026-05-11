@@ -42,6 +42,7 @@ class RegistroFragment : Fragment() {
         val etNombre = view.findViewById<EditText>(R.id.etNombre)
         val etApellido = view.findViewById<EditText>(R.id.etApellido)
         val etFechaNac = view.findViewById<EditText>(R.id.etFechaNac)
+        val etTelefono = view.findViewById<EditText>(R.id.etTelefono)
         val etEmail = view.findViewById<EditText>(R.id.etEmailRegistro)
         val etPassword = view.findViewById<EditText>(R.id.etPasswordRegistro)
         val btnCrearCuenta = view.findViewById<Button>(R.id.btnCrearCuenta)
@@ -58,10 +59,11 @@ class RegistroFragment : Fragment() {
             val fechaNac = etFechaNac.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
+            val telefono = etTelefono.text.toString().trim()
 
 
 
-            if (nombre.isEmpty() || apellido.isEmpty() || fechaNac.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            if (nombre.isEmpty() || apellido.isEmpty() || fechaNac.isEmpty() || email.isEmpty() || password.isEmpty() || telefono.isEmpty()) {
                 Toast.makeText(requireContext(), "Completá todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -81,6 +83,7 @@ class RegistroFragment : Fragment() {
                         nombre = nombre,
                         apellido = apellido,
                         fechaNac = fechaNac,
+                        telefono = telefono,
                         email = email
                     )
 

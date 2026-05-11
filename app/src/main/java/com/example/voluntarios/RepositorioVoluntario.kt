@@ -24,7 +24,8 @@ class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao, private va
                 "nombre" to voluntario.nombre,
                 "apellido" to voluntario.apellido,
                 "fechaNac" to voluntario.fechaNac,
-                "email" to voluntario.email
+                "email" to voluntario.email,
+                "telefono" to voluntario.telefono
             )
 
             try {
@@ -54,7 +55,8 @@ class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao, private va
                     nombre = doc.getString("nombre") ?: "",
                     apellido = doc.getString("apellido") ?: "",
                     fechaNac = doc.getString("fechaNac") ?: "",
-                    email = doc.getString("email") ?: ""
+                    email = doc.getString("email") ?: "",
+                    telefono = doc.getString("telefono") ?: ""
                 )
             } catch (e: Exception) {
                 Log.e("RepositorioVoluntario", "Error obteniendo voluntario", e)
@@ -107,7 +109,8 @@ class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao, private va
                             nombre = doc.getString("nombre") ?: "",
                             apellido = doc.getString("apellido") ?: "",
                             fechaNac = doc.getString("fechaNac") ?: "",
-                            email = doc.getString("email") ?: ""
+                            email = doc.getString("email") ?: "",
+                            telefono = doc.getString("telefono") ?: ""
                         )
                     }
 
@@ -137,7 +140,8 @@ class RepositorioVoluntario(private val voluntarioDao: VoluntarioDao, private va
                 "nombre" to voluntario.nombre,
                 "apellido" to voluntario.apellido,
                 "fechaNac" to voluntario.fechaNac,
-                "email" to voluntario.email
+                "email" to voluntario.email,
+                "telefono" to voluntario.telefono
             )
 
             try {

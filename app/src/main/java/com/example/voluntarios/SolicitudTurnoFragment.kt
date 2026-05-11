@@ -119,6 +119,7 @@ class SolicitudTurnoFragment : Fragment() {
         val etNombre = view.findViewById<EditText>(R.id.editTextNombre)
         val etApellido = view.findViewById<EditText>(R.id.editTextApellido)
         val etFecha = view.findViewById<EditText>(R.id.editTextFecha)
+        val etTelefono = view.findViewById<EditText>(R.id.editTextTelefono)
         val layoutFormulario = view.findViewById<View>(R.id.layoutFormulario)
         val cardEstado = view.findViewById<View>(R.id.cardEstado)
         val tvMensaje = view.findViewById<TextView>(R.id.tvMensajeExito)
@@ -155,6 +156,7 @@ class SolicitudTurnoFragment : Fragment() {
                             etNombre.setText(voluntario.nombre)
                             etApellido.setText(voluntario.apellido)
                             etFecha.setText(voluntario.fechaNac)
+                            etTelefono.setText(voluntario.telefono)
                             layoutFormulario.visibility = View.VISIBLE
                         }
                     } else {
@@ -190,7 +192,8 @@ class SolicitudTurnoFragment : Fragment() {
             val nombre = etNombre.text.toString().trim()
             val apellido = etApellido.text.toString().trim()
             val fecha = etFecha.text.toString().trim()
-            if (nombre.isEmpty() || apellido.isEmpty() || fecha.isEmpty()) {
+            val telefono = etTelefono.text.toString().trim()
+            if (nombre.isEmpty() || apellido.isEmpty() || fecha.isEmpty() || telefono.isEmpty()) {
                 Toast.makeText(
                     requireContext(),
                     "Completá todos los campos",
@@ -204,7 +207,8 @@ class SolicitudTurnoFragment : Fragment() {
                     val voluntarioActualizado = voluntario.copy(
                         nombre = nombre,
                         apellido = apellido,
-                        fechaNac = fecha
+                        fechaNac = fecha,
+                        telefono = telefono
                     )
 
                     voluntarioViewModel.actualizarVoluntario(voluntarioActualizado)

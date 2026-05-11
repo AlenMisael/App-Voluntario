@@ -30,53 +30,65 @@
         <!-- Formulario -->
         <LinearLayout
             android:id="@+id/layoutFormulario"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="400dp"
+            android:layout_height="524dp"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/tvTitulo"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/tvTitulo">
 
                 <TextView
                     android:id="@+id/tvSolicitudText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
                     android:text="Indique nombre, apellido y fecha de nacimiento"
-                    android:textSize="18sp"
-                    android:layout_margin="16dp"/>
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/editTextNombre"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Nombre"
-                    android:layout_marginHorizontal="16dp"/>
+                    android:layout_marginHorizontal="16dp"
+                    android:hint="Nombre" />
 
                 <EditText
                     android:id="@+id/editTextApellido"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Apellido"
                     android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="12dp"/>
+                    android:layout_marginTop="12dp"
+                    android:hint="Apellido" />
 
                 <EditText
                     android:id="@+id/editTextFecha"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:focusable="false"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="12dp"
                     android:clickable="true"
                     android:cursorVisible="false"
-                    android:hint="Fecha de nacimiento"
+                    android:focusable="false"
+                    android:hint="Fecha de nacimiento" />
+
+                <EditText
+                    android:id="@+id/editTextTelefono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="12dp"/>
+                    android:layout_marginTop="12dp"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:hint="Teléfono"
+                    android:inputType="phone" />
 
                 <Button
                     android:id="@+id/btnGuardarTurno"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Solicitar turno"
-                    android:layout_margin="16dp"/>
+                    android:layout_margin="16dp"
+                    android:text="Solicitar turno" />
 
         </LinearLayout>
 
