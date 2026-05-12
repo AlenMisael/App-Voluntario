@@ -24,12 +24,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class SolicitudTurnoFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+
+    private val db = FirebaseFirestore.getInstance()
 
     private val turnoViewModel: TurnoViewModel by viewModels {
         TurnoViewModel.TurnoViewModelFactory(
@@ -89,6 +93,7 @@ class SolicitudTurnoFragment : Fragment() {
                 append("¡Felicitades ${voluntario.nombre} ${voluntario.apellido}! ")
                 append("Somos $totalVoluntarios voluntarios. ")
                 append("Tu turno será el dia ${turno.dia} a las ${turno.horario} horas en ${turno.direccion}. ")
+
             }
 
             "rechazado" -> buildString {
@@ -144,31 +149,62 @@ class SolicitudTurnoFragment : Fragment() {
 
                 if (voluntario != null) {
 
-                    val turno = turnoViewModel.getTurnoPorUidVoluntario(user.uid)
+                    turnoViewModel.escucharTurno(user.uid).collect { turno ->
 
-                    Log.d("SolicitudTurno", "Turno encontrado: $turno")
+                        progressBar.visibility = View.VISIBLE
+                        cardEstado.visibility = View.GONE
+                        view.findViewById<View>(R.id.cardResumenEncuesta).visibility = View.GONE
+                        layoutFormulario.visibility = View.GONE
 
-
-                    if (turno != null) {
-                        mostrarEstado(turno, voluntario, layoutFormulario, cardEstado, tvMensaje, tvEstado)
-
-                    } else {
+                        if (turno != null) {
+                            if (turno.estado.lowercase() == "confirmado") {
+                                val tieneEncuesta = turnoViewModel.tieneEncuestaCompleta(user.uid)
+                                progressBar.visibility = View.GONE
+                                if (tieneEncuesta) {
+                                    mostrarEncuestaCompleta(
+                                        view,
+                                        turno,
+                                        layoutFormulario,
+                                        cardEstado
+                                    )
+                                } else {
+                                    mostrarEstado(
+                                        turno,
+                                        voluntario,
+                                        layoutFormulario,
+                                        cardEstado,
+                                        tvMensaje,
+                                        tvEstado
+                                    )
+                                }
+                            } else {
+                                progressBar.visibility = View.GONE
+                                mostrarEstado(
+                                    turno,
+                                    voluntario,
+                                    layoutFormulario,
+                                    cardEstado,
+                                    tvMensaje,
+                                    tvEstado
+                                )
+                            }
+                        } else {
+                            progressBar.visibility = View.GONE
                             etNombre.setText(voluntario.nombre)
                             etApellido.setText(voluntario.apellido)
                             etFecha.setText(voluntario.fechaNac)
                             etTelefono.setText(voluntario.telefono)
                             layoutFormulario.visibility = View.VISIBLE
                         }
-                    } else {
-                        layoutFormulario.visibility = View.VISIBLE
                     }
-
+                }
+                else {
+                    progressBar.visibility = View.GONE
+                    layoutFormulario.visibility = View.VISIBLE
+                }
 
             }
         }
-
-
-
 
 
         etFecha.setOnClickListener { mostrarDatePicker(requireContext(), etFecha) }
@@ -216,7 +252,8 @@ class SolicitudTurnoFragment : Fragment() {
                     val turno = Turno(
                         voluntarioId = null,
                         voluntariouid = user.uid,
-                        estado = "pendiente"
+                        estado = "pendiente",
+                        asignado = false
                     )
                     turnoViewModel.insertar(turno)
 
@@ -243,7 +280,7 @@ class SolicitudTurnoFragment : Fragment() {
         }
     }
 
-    /*
+
 
     private fun mostrarEncuestaCompleta(
         view: View,
@@ -273,7 +310,7 @@ class SolicitudTurnoFragment : Fragment() {
                 .commit()
         }
     }
-*/
+
 
     private fun suscribirseANtfy(topic: String) {
         Log.d("SolicitudTurno", "Topic: $topic")

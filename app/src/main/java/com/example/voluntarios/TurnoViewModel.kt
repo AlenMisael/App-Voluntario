@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
@@ -33,6 +34,15 @@ class TurnoViewModel(
         listenerRegistration?.remove()
         listenerRegistration = null
     }
+
+    fun escucharTurno(voluntarioUid: String): Flow<Turno?> {
+        return turnoRepositorio.escucharTurnoPorVoluntario(voluntarioUid)
+    }
+
+    suspend fun tieneEncuestaCompleta(voluntarioUid: String): Boolean {
+        return turnoRepositorio.getEncuestaCompletaPorVoluntario(voluntarioUid)
+    }
+
 
     suspend fun insertar(turno: Turno): String? {
         return turnoRepositorio.insertar(turno)

@@ -11,7 +11,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -29,6 +31,7 @@ class RepositorioTurno(
         val turnoFirestore = hashMapOf(
             "uidVoluntario" to turno.voluntariouid,
             "estado" to turno.estado,
+            "asignado" to turno.asignado,
             "dia" to turno.dia,
             "horario" to turno.horario,
             "direccion" to turno.direccion,
@@ -68,6 +71,45 @@ class RepositorioTurno(
                 }
                 onChange(lista)
             }
+    }
+
+    fun escucharTurnoPorVoluntario(voluntarioUid: String): Flow<Turno?> = callbackFlow {
+        val listener = db.collection("turnos")
+            .whereEqualTo("uidVoluntario", voluntarioUid)
+            .limit(1)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) {
+                    trySend(null)
+                    return@addSnapshotListener
+                }
+                val doc = snapshot.documents.firstOrNull()
+                if (doc != null) {
+                    trySend(Turno(
+                        fireStoreid = doc.id,
+                        voluntarioId = null,
+                        voluntariouid = doc.getString("uidVoluntario") ?: "",
+                        estado = doc.getString("estado") ?: "pendiente",
+                        dia = doc.getString("dia") ?: "",
+                        horario = doc.getString("horario") ?: "",
+                        direccion = doc.getString("direccion") ?: "",
+                        descripcion = doc.getString("descripcion") ?: ""
+                    ))
+                } else {
+                    trySend(null)
+                }
+            }
+        awaitClose { listener.remove() }
+    }
+
+
+    suspend fun getEncuestaCompletaPorVoluntario(voluntarioUid: String): Boolean {
+        val snapshot = db.collection("encuestas")
+            .whereEqualTo("voluntarioid", voluntarioUid)
+            .whereEqualTo("completa", true)
+            .limit(1)
+            .get()
+            .await()
+        return !snapshot.isEmpty
     }
 
     suspend fun getTurnoPorUidVoluntario(uid: String): Turno? {
