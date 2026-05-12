@@ -313,16 +313,14 @@ class SolicitudTurnoFragment : Fragment() {
 
 
     private fun suscribirseANtfy(topic: String) {
-        Log.d("SolicitudTurno", "Topic: $topic")
-
-        val uri = Uri.parse("https://ntfy.sh/$topic")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("ntfy://ntfy.sh/$topic?auto-subscribe=1"))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         try {
             startActivity(intent)
+            Log.d("SolicitudTurno", "Auto-suscrito a tópico: $topic")
         } catch (e: Exception) {
-            Log.w("SolicitudTurno", "Error abriendo ntfy", e)
-            Toast.makeText(requireContext(), "Topic: $topic", Toast.LENGTH_LONG).show()
+            Log.w("SolicitudTurno", "App ntfy no instalada", e)
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://ntfy.sh/app")))
         }
     }
 }
