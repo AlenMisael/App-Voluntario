@@ -24,6 +24,11 @@ class EncuestaViewModel(private val repositorio: RepositorioEncuestas): ViewMode
         data class Error(val mensaje: String) : EstadoEncuesta()
     }
 
+
+    suspend fun getAlimentosPorTurno(turnoId: String): List<Alimento> {
+        return repositorio.getAlimentosPorTurno(turnoId)
+    }
+
     private val _estadoEncuesta = MutableStateFlow<EstadoEncuesta>(EstadoEncuesta.Cargando)
     val estadoEncuesta: StateFlow<EstadoEncuesta> = _estadoEncuesta
 

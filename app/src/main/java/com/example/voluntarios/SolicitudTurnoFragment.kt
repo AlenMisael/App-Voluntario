@@ -289,7 +289,6 @@ class SolicitudTurnoFragment : Fragment() {
         cardEstado: View
     ) {
         val cardEncuestaCompleta = view.findViewById<View>(R.id.cardResumenEncuesta)
-        val tvFelicitaciones = view.findViewById<TextView>(R.id.tvFelicitacionesEncuesta)
         val tvDiaResumen = view.findViewById<TextView>(R.id.tvResumenDia)
         val tvHorarioResumen = view.findViewById<TextView>(R.id.tvResumenHorario)
         val tvDireccionResumen = view.findViewById<TextView>(R.id.tvResumenDireccion)
@@ -304,8 +303,13 @@ class SolicitudTurnoFragment : Fragment() {
         tvDireccionResumen.text = "Dirección: ${turno.direccion}"
 
         btnVerResumen.setOnClickListener {
+            val fragment = ResumenEncuestaFragment().apply {
+                arguments = Bundle().apply {
+                    putString("turnoId", turno.fireStoreid)
+                }
+            }
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ResumenEncuestaFragment())
+                .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit()
         }
