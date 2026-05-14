@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -76,6 +77,7 @@ class RepositorioTurno(
     fun escucharTurnoPorVoluntario(voluntarioUid: String): Flow<Turno?> = callbackFlow {
         val listener = db.collection("turnos")
             .whereEqualTo("uidVoluntario", voluntarioUid)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(1)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) {

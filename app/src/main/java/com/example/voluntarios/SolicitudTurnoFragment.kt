@@ -33,6 +33,7 @@ class SolicitudTurnoFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
 
+
     private val db = FirebaseFirestore.getInstance()
 
     private val turnoViewModel: TurnoViewModel by viewModels {
@@ -60,7 +61,12 @@ class SolicitudTurnoFragment : Fragment() {
         layoutFormulario: View,
         cardEstado: View,
         tvMensaje: TextView,
-        tvEstado: TextView
+        tvEstado: TextView,
+        tvSolicitudOtroTurno: TextView,
+        etNombre: EditText,
+        etApellido: EditText,
+        etFecha: EditText,
+        etTelefono: EditText
     ) {
         val totalVoluntarios = voluntarioViewModel.contarVoluntarios()
         val card = cardEstado as MaterialCardView
@@ -108,12 +114,29 @@ class SolicitudTurnoFragment : Fragment() {
             }
         }
 
+        if (turno.estado.lowercase() == "rechazado") {
+            tvSolicitudOtroTurno.visibility = View.VISIBLE
+            tvSolicitudOtroTurno.setOnClickListener {
+                etNombre.setText(voluntario.nombre)
+                etApellido.setText(voluntario.apellido)
+                etFecha.setText(voluntario.fechaNac)
+                etTelefono.setText(voluntario.telefono)
+
+                cardEstado.visibility = View.GONE
+                layoutFormulario.visibility = View.VISIBLE
+            }
+        } else {
+            tvSolicitudOtroTurno.visibility = View.GONE
+        }
+
         layoutFormulario.visibility = View.GONE
         cardEstado.visibility = View.VISIBLE
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val tvSolicitudOtroTurno = view.findViewById<TextView>(R.id.tvSolicitudOtroTurno)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
@@ -165,7 +188,7 @@ class SolicitudTurnoFragment : Fragment() {
                                         view,
                                         turno,
                                         layoutFormulario,
-                                        cardEstado
+                                        cardEstado,
                                     )
                                 } else {
                                     mostrarEstado(
@@ -174,7 +197,12 @@ class SolicitudTurnoFragment : Fragment() {
                                         layoutFormulario,
                                         cardEstado,
                                         tvMensaje,
-                                        tvEstado
+                                        tvEstado,
+                                        tvSolicitudOtroTurno,
+                                        etNombre,
+                                        etApellido,
+                                        etFecha,
+                                        etTelefono
                                     )
                                 }
                             } else {
@@ -185,7 +213,12 @@ class SolicitudTurnoFragment : Fragment() {
                                     layoutFormulario,
                                     cardEstado,
                                     tvMensaje,
-                                    tvEstado
+                                    tvEstado,
+                                    tvSolicitudOtroTurno,
+                                    etNombre,
+                                    etApellido,
+                                    etFecha,
+                                    etTelefono
                                 )
                             }
                         } else {
@@ -263,7 +296,12 @@ class SolicitudTurnoFragment : Fragment() {
                         layoutFormulario = layoutFormulario,
                         cardEstado = cardEstado,
                         tvMensaje = tvMensaje,
-                        tvEstado = tvEstado
+                        tvEstado = tvEstado,
+                        tvSolicitudOtroTurno = tvSolicitudOtroTurno,
+                        etNombre = etNombre,
+                        etApellido = etApellido,
+                        etFecha = etFecha,
+                        etTelefono = etTelefono
                     )
 
                     val topic =

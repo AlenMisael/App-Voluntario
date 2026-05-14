@@ -77,9 +77,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="16dp"
                     android:layout_marginTop="12dp"
-                    android:clickable="true"
-                    android:cursorVisible="false"
-                    android:focusable="false"
                     android:hint="Teléfono"
                     android:inputType="phone" />
 
@@ -125,6 +122,22 @@
                             android:layout_marginTop="8dp"
                             android:text="Mensaje..."
                             android:textSize="16sp"/>
+
+
+                        <TextView
+                            android:id="@+id/tvSolicitudOtroTurno"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Si desea solicitar otro turno, haga click aquí"
+                            android:textSize="15sp"
+                            android:textColor="#1565C0"
+                            android:textStyle="bold"
+                            android:visibility="gone"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground"
+                            android:padding="4dp"/>
 
                 </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -190,6 +203,8 @@
                             android:text="Ver resumen de encuesta"
                             android:textAllCaps="false"
                             app:cornerRadius="8dp"/>
+
+
 
                 </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
