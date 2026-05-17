@@ -4,6 +4,8 @@ import android.adservices.topics.Topic
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputFilter
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -27,7 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
+import android.text.TextWatcher
 class SolicitudTurnoFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
@@ -156,7 +158,34 @@ class SolicitudTurnoFragment : Fragment() {
         val btnGuardarTurno = view.findViewById<Button>(R.id.btnGuardarTurno)
 
 
-        super.onViewCreated(view, savedInstanceState)
+        val filtroSoloLetras = InputFilter { source, _, _, _, _, _ ->
+            if (source.all { it.isLetter() || it.isWhitespace() }) null else ""
+        }
+        etNombre.filters = arrayOf(filtroSoloLetras)
+        etApellido.filters = arrayOf(filtroSoloLetras)
+
+        etTelefono.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                val telefono = s.toString().trim()
+                if (telefono.isNotEmpty() && (telefono.length < 10 || telefono.length > 13)) {
+                    etTelefono.error = "El teléfono debe tener entre 10 y 13 números"
+                } else {
+                    etTelefono.error = null
+                }
+            }
+        })
+
+        savedInstanceState?.let { bundle ->
+            etNombre.setText(bundle.getString("nombre", ""))
+            etApellido.setText(bundle.getString("apellido", ""))
+            etFecha.setText(bundle.getString("fechaNac", ""))
+            etTelefono.setText(bundle.getString("telefono", ""))
+        }
+
+
         val btnCerrarSesion = view.findViewById<Button>(R.id.btnCerrarSesion)
 
         val user = auth.currentUser
@@ -223,16 +252,19 @@ class SolicitudTurnoFragment : Fragment() {
                             }
                         } else {
                             progressBar.visibility = View.GONE
-                            etNombre.setText(voluntario.nombre)
-                            etApellido.setText(voluntario.apellido)
-                            etFecha.setText(voluntario.fechaNac)
-                            etTelefono.setText(voluntario.telefono)
+                            if (savedInstanceState == null) {
+                                etNombre.setText(voluntario.nombre)
+                                etApellido.setText(voluntario.apellido)
+                                etFecha.setText(voluntario.fechaNac)
+                                etTelefono.setText(voluntario.telefono)
+                            }
                             layoutFormulario.visibility = View.VISIBLE
                         }
                     }
                 }
                 else {
                     progressBar.visibility = View.GONE
+
                     layoutFormulario.visibility = View.VISIBLE
                 }
 
@@ -253,6 +285,11 @@ class SolicitudTurnoFragment : Fragment() {
         }
 
         btnGuardarTurno.setOnClickListener {
+            if (etTelefono.error != null) {
+                etTelefono.requestFocus()
+                return@setOnClickListener
+            }
+
             if (user == null) {
                 Toast.makeText(requireContext(), "No hay usuario logueado", Toast.LENGTH_SHORT)
                     .show()
@@ -314,6 +351,20 @@ class SolicitudTurnoFragment : Fragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        view?.let {
+            val layoutFormulario = it.findViewById<View>(R.id.layoutFormulario)
+            if (layoutFormulario.visibility == View.VISIBLE) {
+                outState.putString("nombre",   it.findViewById<EditText>(R.id.editTextNombre).text.toString())
+                outState.putString("apellido", it.findViewById<EditText>(R.id.editTextApellido).text.toString())
+                outState.putString("fechaNac", it.findViewById<EditText>(R.id.editTextFecha).text.toString())
+                outState.putString("telefono", it.findViewById<EditText>(R.id.editTextTelefono).text.toString())
             }
         }
     }

@@ -1,6 +1,8 @@
 package com.example.voluntarios
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import android.text.TextWatcher
 
 
 
@@ -49,6 +52,51 @@ class RegistroFragment : Fragment() {
         val btnVolverLogin = view.findViewById<Button>(R.id.btnVolverLogin)
 
 
+        savedInstanceState?.let { bundle ->
+            etNombre.setText(bundle.getString("nombre", ""))
+            etApellido.setText(bundle.getString("apellido", ""))
+            etFechaNac.setText(bundle.getString("fechaNac", ""))
+            etTelefono.setText(bundle.getString("telefono", ""))
+            etEmail.setText(bundle.getString("email", ""))
+        }
+
+        val filtroSoloLetras = InputFilter { source, _, _, _, _, _ ->
+            if (source.all { it.isLetter() || it.isWhitespace() }) null else ""
+        }
+
+        etNombre.filters = arrayOf(filtroSoloLetras)
+        etApellido.filters = arrayOf(filtroSoloLetras)
+
+
+        etEmail.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                val email = s.toString().trim()
+                if (email.isNotEmpty() && !validarEmail(email)) {
+                    etEmail.error = "El email debe ser @gmail.com, @yahoo.com, @outlook.com o @hotmail.com"
+                } else {
+                    etEmail.error = null
+                }
+            }
+        })
+
+        etTelefono.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                val telefono = s.toString().trim()
+                if (telefono.isNotEmpty() && (telefono.length < 10 || telefono.length > 13)) {
+                    etTelefono.error = "El teléfono debe tener entre 10 y 13 números"
+                } else {
+                    etTelefono.error = null
+                }
+            }
+        })
+
+
         etFechaNac.setOnClickListener {
             mostrarDatePicker(requireContext(), etFechaNac)
         }
@@ -63,10 +111,23 @@ class RegistroFragment : Fragment() {
 
 
 
+
+            if (etEmail.error != null || !validarEmail(email)) {
+                etEmail.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (etTelefono.error != null) {
+                etTelefono.requestFocus()
+                return@setOnClickListener
+            }
+
             if (nombre.isEmpty() || apellido.isEmpty() || fechaNac.isEmpty() || email.isEmpty() || password.isEmpty() || telefono.isEmpty()) {
                 Toast.makeText(requireContext(), "Completá todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+
 
             btnCrearCuenta.isEnabled = false
             btnCrearCuenta.text = "Registrando..."
@@ -125,6 +186,23 @@ class RegistroFragment : Fragment() {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, LoginFragment())
                 .commit()
+        }
+    }
+
+    private fun validarEmail(email: String): Boolean {
+        val regex = Regex("^[a-zA-Z0-9._%+\\-]+@(gmail|yahoo|outlook|hotmail)\\.com$")
+        return regex.matches(email)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        view?.let {
+            outState.putString("nombre",   it.findViewById<EditText>(R.id.etNombre).text.toString())
+            outState.putString("apellido", it.findViewById<EditText>(R.id.etApellido).text.toString())
+            outState.putString("fechaNac", it.findViewById<EditText>(R.id.etFechaNac).text.toString())
+            outState.putString("telefono", it.findViewById<EditText>(R.id.etTelefono).text.toString())
+            outState.putString("email",    it.findViewById<EditText>(R.id.etEmailRegistro).text.toString())
         }
     }
 
