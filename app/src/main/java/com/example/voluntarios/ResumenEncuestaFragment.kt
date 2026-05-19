@@ -38,7 +38,6 @@ class ResumenEncuestaFragment : Fragment(R.layout.fragment_resumen_encuesta) {
         loader = view.findViewById(R.id.loader)
         content = view.findViewById(R.id.contentView)
 
-        // TextViews totales
         val tvSub: TextView = view.findViewById(R.id.tvSubtitulo)
         val tvKcalTotal: TextView = view.findViewById(R.id.tvKcalTotal)
         val tvCarboTotal: TextView = view.findViewById(R.id.tvCarboTotal)
@@ -49,7 +48,6 @@ class ResumenEncuestaFragment : Fragment(R.layout.fragment_resumen_encuesta) {
         val tvAlcoholTotal: TextView = view.findViewById(R.id.tvAlcoholTotal)
         val tvGramosTotal: TextView = view.findViewById(R.id.tvGramosTotal)
 
-        // TextViews promedios
         val tvKcalProm: TextView = view.findViewById(R.id.tvKcalPromedio)
         val tvCarboProm: TextView = view.findViewById(R.id.tvCarboPromedio)
         val tvProteProm: TextView = view.findViewById(R.id.tvProtePromedio)
@@ -95,23 +93,21 @@ class ResumenEncuestaFragment : Fragment(R.layout.fragment_resumen_encuesta) {
                 val n = alimentos.size.coerceAtLeast(1)
                 fun dbl(v: Double) = ((v * 10.0).roundToInt() / 10.0)
 
-                // Totales
-                tvKcalTotal.setStatText("Kcal total", dbl(totalKcal).toString(), "kcal")
-                tvCarboTotal.setStatText("Carbohidratos total", dbl(totalCarbo).toString(), "g")
-                tvProteTotal.setStatText("Proteínas total", dbl(totalProte).toString(), "g")
-                tvColesterolTotal.setStatText("Colesterol total", dbl(totalColesterol).toString(), "mg")
-                tvFibraTotal.setStatText("Fibras total", dbl(totalFibra).toString(), "g")
-                tvGrasasTotal.setStatText("Grasas totales", dbl(totalGrasas).toString(), "g")
-                tvAlcoholTotal.setStatText("Alcohol total", dbl(totalAlcohol).toString(), "g")
-                tvGramosTotal.setStatText("Gramos totales", dbl(totalGramos).toString(), "g")
+                tvKcalTotal.setStatText(tvKcalTotal.text.toString(), dbl(totalKcal).toString(), "kcal")
+                tvCarboTotal.setStatText(tvCarboTotal.text.toString(), dbl(totalCarbo).toString(), "g")
+                tvProteTotal.setStatText(tvProteTotal.text.toString(), dbl(totalProte).toString(), "g")
+                tvColesterolTotal.setStatText(tvColesterolTotal.text.toString(), dbl(totalColesterol).toString(), "mg")
+                tvFibraTotal.setStatText(tvFibraTotal.text.toString(), dbl(totalFibra).toString(), "g")
+                tvGrasasTotal.setStatText(tvGrasasTotal.text.toString(), dbl(totalGrasas).toString(), "g")
+                tvAlcoholTotal.setStatText(tvAlcoholTotal.text.toString(), dbl(totalAlcohol).toString(), "g")
+                tvGramosTotal.setStatText(tvGramosTotal.text.toString(), dbl(totalGramos).toString(), "g")
 
-                // Promedios por alimento
-                tvKcalProm.setStatText("Kcal promedio", dbl(totalKcal / n).toString(), "kcal")
-                tvCarboProm.setStatText("Carbohidratos promedio", dbl(totalCarbo / n).toString(), "g")
-                tvProteProm.setStatText("Proteínas promedio", dbl(totalProte / n).toString(), "g")
-                tvGrasasProm.setStatText("Grasas totales promedio", dbl(totalGrasas / n).toString(), "g")
-                tvColesterolProm.setStatText("Colesterol promedio", dbl(totalColesterol / n).toString(), "mg")
-                tvFibraProm.setStatText("Fibra promedio", dbl(totalFibra / n).toString(), "g")
+                tvKcalProm.setStatText(tvKcalProm.text.toString(), dbl(totalKcal / n).toString(), "kcal")
+                tvCarboProm.setStatText(tvCarboProm.text.toString(), dbl(totalCarbo / n).toString(), "g")
+                tvProteProm.setStatText(tvProteProm.text.toString(), dbl(totalProte / n).toString(), "g")
+                tvGrasasProm.setStatText(tvGrasasProm.text.toString(), dbl(totalGrasas / n).toString(), "g")
+                tvColesterolProm.setStatText(tvColesterolProm.text.toString(), dbl(totalColesterol / n).toString(), "mg")
+                tvFibraProm.setStatText(tvFibraProm.text.toString(), dbl(totalFibra / n).toString(), "g")
                 loader.visibility = View.GONE
                 content.alpha = 0f
                 content.visibility = View.VISIBLE

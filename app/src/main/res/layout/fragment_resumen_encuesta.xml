@@ -21,7 +21,6 @@
             android:orientation="vertical"
             android:paddingTop="56dp">
 
-            <!-- Título -->
             <TextView
                 android:id="@+id/tvSubtitulo"
                 android:layout_width="match_parent"
@@ -30,103 +29,109 @@
                 android:textSize="22sp"
                 android:textStyle="bold"/>
 
-            <!-- ================== TOTALES ================== -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Totales diarios"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="4dp"/>
 
             <TextView
                 android:id="@+id/tvKcalTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Kcal total:"
+                android:text="Total de kilocalorias consumidas:"
                 android:layout_marginTop="16dp"/>
 
             <TextView
                 android:id="@+id/tvCarboTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Carbohidratos total:"/>
+                android:text="Total de carbohidratos consumidos:"/>
 
             <TextView
                 android:id="@+id/tvProteTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Proteínas total:"/>
+                android:text="Total de proteinas consumidas:"/>
 
             <TextView
                 android:id="@+id/tvColesterolTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Colesterol total:"/>
+                android:text="Total de colesterol consumido:"/>
 
             <TextView
                 android:id="@+id/tvFibraTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Fibra total:"/>
+                android:text="Total de fibra consumida:"/>
 
             <TextView
                 android:id="@+id/tvGrasasTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Grasas totales:"/>
+                android:text="Total de grasa consumida:"/>
 
             <TextView
                 android:id="@+id/tvAlcoholTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Alcohol total:"/>
+                android:text="Total de alcohol consumido:"/>
 
             <TextView
                 android:id="@+id/tvGramosTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Gramos totales:"/>
+                android:text="Total de gramos consumido:"/>
 
-            <!-- ================== PROMEDIOS ================== -->
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Promedios por alimento"
                 android:textStyle="bold"
-                android:layout_marginTop="24dp"/>
+                android:textSize="16sp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="4dp"/>
 
             <TextView
                 android:id="@+id/tvKcalPromedio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Kcal promedio:"/>
+                android:text="Promedio de kilocalorias diarias:"/>
 
             <TextView
                 android:id="@+id/tvCarboPromedio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Carbohidratos promedio:"/>
+                android:text="Promedio de carbohidratos diarios:"/>
 
             <TextView
                 android:id="@+id/tvProtePromedio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Proteínas promedio:"/>
+                android:text="Promedio de proteinas diarias:"/>
 
             <TextView
                 android:id="@+id/tvGrasasPromedio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Grasas promedio:"/>
+                android:text="Promedio de grasas diarias:"/>
 
             <TextView
                 android:id="@+id/tvColesterolPromedio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Colesterol promedio:"/>
+                android:text="Promedio de colesterol diario:"/>
 
             <TextView
                 android:id="@+id/tvFibraPromedio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Fibra promedio:"/>
-
-
+                android:text="Promedio de fibra diaria:"/>
 
             <View
                 android:layout_width="match_parent"
