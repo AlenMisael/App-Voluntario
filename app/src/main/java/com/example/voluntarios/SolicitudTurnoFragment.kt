@@ -76,7 +76,7 @@ class SolicitudTurnoFragment : Fragment() {
         val colorFondo = when (turno.estado.lowercase()) {
             "pendiente" -> ContextCompat.getColor(requireContext(), R.color.estado_pendiente_bg)
             "confirmado" -> ContextCompat.getColor(requireContext(), R.color.estado_confirmado_bg)
-            "rechazado" -> ContextCompat.getColor(requireContext(), R.color.estado_rechazado_bg)
+            "cancelado" -> ContextCompat.getColor(requireContext(), R.color.estado_cancelado_bg)
             else -> ContextCompat.getColor(requireContext(), android.R.color.white)
         }
         card.setCardBackgroundColor(colorFondo)
@@ -92,7 +92,7 @@ class SolicitudTurnoFragment : Fragment() {
         tvEstado.text = when (turno.estado.lowercase()) {
             "pendiente" -> "Estado del turno: Pendiente"
             "confirmado" -> "Estado del turno: Confirmado"
-            "rechazado" -> "Estado del turno: Rechazado"
+            "cancelado" -> "Estado del turno: Cancelado"
             else -> "Estado: ${turno.estado}"
         }
 
@@ -104,7 +104,7 @@ class SolicitudTurnoFragment : Fragment() {
 
             }
 
-            "rechazado" -> buildString {
+            "cancelado" -> buildString {
                 append("Lamentamos informarte que tu turno ha sido cancelado, ${voluntario.nombre}. ")
                 append("Motivo: ${turno.descripcion}")
             }
@@ -116,7 +116,7 @@ class SolicitudTurnoFragment : Fragment() {
             }
         }
 
-        if (turno.estado.lowercase() == "rechazado") {
+        if (turno.estado.lowercase() == "cancelado") {
             tvSolicitudOtroTurno.visibility = View.VISIBLE
             tvSolicitudOtroTurno.setOnClickListener {
                 etNombre.setText(voluntario.nombre)

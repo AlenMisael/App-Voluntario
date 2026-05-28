@@ -1,6 +1,6 @@
 <resources>
     <color name="estado_pendiente_bg">#5D4037</color>
     <color name="estado_confirmado_bg">#1B5E20</color>
-    <color name="estado_rechazado_bg">#B71C1C</color>
+    <color name="estado_cancelado_bg">#B71C1C</color>
     <color name="texto_estado">#FFFFFF</color>
 </resources>

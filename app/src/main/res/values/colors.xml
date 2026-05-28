@@ -9,5 +9,5 @@
     <color name="texto_estado">#000000</color>
     <color name="estado_pendiente_bg">#FFF8E1</color>
     <color name="estado_confirmado_bg">#E8F5E9</color>
-    <color name="estado_rechazado_bg">#FFEBEE</color>
+    <color name="estado_cancelado_bg">#FFEBEE</color>
 </resources>
