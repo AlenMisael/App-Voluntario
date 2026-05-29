@@ -54,6 +54,8 @@ class ResumenEncuestaFragment : Fragment(R.layout.fragment_resumen_encuesta) {
         val tvGrasasProm: TextView = view.findViewById(R.id.tvGrasasPromedio)
         val tvColesterolProm: TextView = view.findViewById(R.id.tvColesterolPromedio)
         val tvFibraProm: TextView = view.findViewById(R.id.tvFibraPromedio)
+        val tvAlcoholProm: TextView = view.findViewById(R.id.tvAlcoholProm)
+        val tvGramosProm: TextView = view.findViewById(R.id.tvGramosProm)
 
         val btnVolver: ImageButton = view.findViewById(R.id.btnVolver)
 
@@ -108,6 +110,8 @@ class ResumenEncuestaFragment : Fragment(R.layout.fragment_resumen_encuesta) {
                 tvGrasasProm.setStatText(tvGrasasProm.text.toString(), dbl(totalGrasas / n).toString(), "g")
                 tvColesterolProm.setStatText(tvColesterolProm.text.toString(), dbl(totalColesterol / n).toString(), "mg")
                 tvFibraProm.setStatText(tvFibraProm.text.toString(), dbl(totalFibra / n).toString(), "g")
+                tvAlcoholProm.setStatText(tvAlcoholProm.text.toString(),dbl(totalAlcohol / n).toString(),"g")
+                tvGramosProm.setStatText(tvGramosProm.text.toString(),dbl(totalGramos/n).toString(), "g")
                 loader.visibility = View.GONE
                 content.alpha = 0f
                 content.visibility = View.VISIBLE
