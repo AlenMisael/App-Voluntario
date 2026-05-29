@@ -17,8 +17,6 @@ import kotlinx.coroutines.launch
 import android.text.TextWatcher
 
 
-
-
 class RegistroFragment : Fragment() {
 
     private val voluntarioViewModel: VoluntarioViewModel by viewModels {
