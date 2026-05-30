@@ -258,13 +258,14 @@ class SolicitudTurnoFragment : Fragment() {
                                 etFecha.setText(voluntario.fechaNac)
                                 etTelefono.setText(voluntario.telefono)
                             }
-                            layoutFormulario.visibility = View.VISIBLE
                         }
                     }
                 }
                 else {
                     progressBar.visibility = View.GONE
-
+                    val nombreCompleto = user.displayName?.trim()?.split(" ")?.filter { it.isNotBlank() }
+                    etNombre.setText(nombreCompleto?.firstOrNull() ?: "")
+                    etApellido.setText(if ((nombreCompleto?.size ?: 0) > 1) nombreCompleto?.drop(1)?.joinToString(" ") else "")
                     layoutFormulario.visibility = View.VISIBLE
                 }
 
@@ -308,7 +309,20 @@ class SolicitudTurnoFragment : Fragment() {
                 return@setOnClickListener
             }
             lifecycleScope.launch {
-                val voluntario = turnoViewModel.getVoluntarioByUid(user.uid)
+                var voluntario = turnoViewModel.getVoluntarioByUid(user.uid)
+                if (voluntario == null) {
+                    val nuevoVoluntario = Voluntario(
+                        firebaseUid = user.uid,
+                        nombre = nombre,
+                        apellido = apellido,
+                        fechaNac = fecha,
+                        telefono = telefono,
+                        email = user.email ?: ""
+                    )
+                    voluntarioViewModel.insertar(nuevoVoluntario)
+                    voluntario = turnoViewModel.getVoluntarioByUid(user.uid)
+                }
+
                 if (voluntario != null) {
                     val voluntarioActualizado = voluntario.copy(
                         nombre = nombre,
