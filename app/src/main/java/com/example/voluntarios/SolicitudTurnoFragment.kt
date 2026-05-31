@@ -258,6 +258,7 @@ class SolicitudTurnoFragment : Fragment() {
                                 etFecha.setText(voluntario.fechaNac)
                                 etTelefono.setText(voluntario.telefono)
                             }
+                            layoutFormulario.visibility = View.VISIBLE
                         }
                     }
                 }
